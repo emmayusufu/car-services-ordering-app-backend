@@ -18,13 +18,13 @@ class App {
   listen = () => {
     createConnection().then(()=>{
         this.server.listen(this.port, () => {
-            console.log(`Server is running on port http://localhost:${this.port}`);
+            console.log(`Server is running on http://localhost:${this.port}`);
         });
     })
   };
 
   initializeRoutes = (routes: AppRouter[]) => {
-    routes.forEach(({ path, router }) => {
+    routes.map(({ path, router }) => {
       return this.app.use(path, router);
     });
   };
