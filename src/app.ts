@@ -16,7 +16,7 @@ class App {
   }
 
   listen = () => {
-    createConnection().then(async()=>{
+    createConnection().then(()=>{
         this.server.listen(this.port, () => {
             console.log(`Server is running on port http://localhost:${this.port}`);
         });
