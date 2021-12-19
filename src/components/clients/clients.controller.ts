@@ -1,12 +1,12 @@
-import e, { RequestHandler } from "express";
-import { Client } from "../../database/entities/client.entity";
+import { RequestHandler } from "express";
+import { Client } from "../../database/entities/clients.entity";
 import { PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
 import { generateOTP, sendSMS } from "../../utils/helpers";
 import { redisClient } from "../../utils/redis";
 import jwt from "jsonwebtoken";
 
 class ClientsController {
-  getAll: RequestHandler = async (req, res, next) => {
+  getAll: RequestHandler = async (_req, res, next) => {
     try {
       const clients = await Client.find();
       res.status(200).json(clients);
@@ -18,7 +18,7 @@ class ClientsController {
   getOne: RequestHandler = async (req, res, next) => {
     const { uuid } = req.params as {
       uuid: string;
-    };
+    }; 
     try {
       const client = await Client.findOne({ uuid });
       res.status(200).json({ client });
@@ -102,28 +102,6 @@ class ClientsController {
       } else {
         res.status(405).json();
       }
-    } catch (error) {
-      next(new Error(error));
-    }
-  };
-
-  deleteAll: RequestHandler = async (_req, res, next) => {
-    try {
-      const clients = await Client.find();
-      await Client.remove(clients);
-    } catch (error) {
-      next(new Error(error));
-    }
-  };
-
-  deleteOne: RequestHandler = async (req, res, next) => {
-    const { uuid } = req.body as {
-      uuid: string;
-    };
-    try {
-      const client = await Client.findOne({ uuid });
-      await client.remove();
-      res.status(200).json();
     } catch (error) {
       next(new Error(error));
     }

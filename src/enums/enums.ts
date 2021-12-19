@@ -16,3 +16,8 @@ export enum ProfileSetup {
   PENDING = "pending",
   COMPLETE = "complete",
 }
+
+export enum PartnerType {
+  COMPANY = "company",
+  INDIVIDUAL = "individual"
+}

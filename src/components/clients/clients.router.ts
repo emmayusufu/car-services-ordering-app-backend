@@ -17,8 +17,6 @@ class ClientsRouter implements AppRouter {
         this.router.post("/verify-otp",this.controller.verifyOtp)
         this.router.post("/profile-setup",this.controller.profileSetup)
         this.router.post("/verify-phonenumber",this.controller.verifyPhoneNumber)
-        this.router.delete("/:id",this.controller.deleteAll)
-        this.router.delete("/:id",this.controller.deleteOne)
     }
 }
 

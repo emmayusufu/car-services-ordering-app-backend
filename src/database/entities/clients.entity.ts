@@ -60,4 +60,8 @@ export class Client extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  toJson() {
+    return { ...this, id: undefined };
+  }
 }
