@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { Client } from "../../database/entities/clients.entity";
 import { PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
 import { generateOTP, sendSMS } from "../../utils/helpers";
-import { redisClient } from "../../utils/redis";
+import { storeValue, getValue } from "../../utils/redis";
 import jwt from "jsonwebtoken";
 
 class ClientsController {
@@ -18,7 +18,7 @@ class ClientsController {
   getOne: RequestHandler = async (req, res, next) => {
     const { uuid } = req.params as {
       uuid: string;
-    }; 
+    };
     try {
       const client = await Client.findOne({ uuid });
       res.status(200).json({ client });
@@ -32,10 +32,11 @@ class ClientsController {
     const otp = generateOTP();
     try {
       const client = await Client.findOne({ phoneNumber });
-      await redisClient.setEx(phoneNumber, 360, otp);
-      await sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
+
+      await storeValue(phoneNumber, otp, 360);
+      // await sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
       if (client) {
-        res.status(200).json();
+        res.status(200).json(); 
       } else {
         const newClient = new Client();
         newClient.phoneNumber = phoneNumber;
@@ -53,7 +54,7 @@ class ClientsController {
       phoneNumber: string;
     };
     try {
-      const value = await redisClient.get(phoneNumber);
+      const value = await getValue(phoneNumber);
       if (value) {
         if (otp === value) {
           const client = await Client.findOne({ phoneNumber });
@@ -111,7 +112,7 @@ class ClientsController {
     const { phoneNumber } = req.body;
     const otp = generateOTP();
     try {
-      redisClient.setEx(phoneNumber, 30, otp);
+      // redisClient.setEx(phoneNumber, 30, otp);
       res.json({ message: "success" });
     } catch (error) {
       next(new Error(error));

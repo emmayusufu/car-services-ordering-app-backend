@@ -9,11 +9,15 @@ import {
   JoinColumn,
   OneToOne,
 } from "typeorm";
-import { PartnerType, PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
+import {
+  PartnerType,
+  PhoneNumberVerification,
+  ProfileSetup,
+} from "../../enums/enums";
 import { Company } from "./companies.entity";
 import { Individual } from "./individuals.entity";
 
-Entity({ name: "partners" });
+@Entity({ name: "partners" })
 export class Partner extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -26,13 +30,13 @@ export class Partner extends BaseEntity {
   uuid: string;
 
   @Column({
-    unique:true,
-    nullable:true,
+    unique: true,
+    nullable: true,
   })
   phoneNumber: string;
 
   @Column({
-    unique: true,
+    unique: false,
     enum: PhoneNumberVerification,
     default: PhoneNumberVerification.PENDING,
   })
@@ -46,20 +50,20 @@ export class Partner extends BaseEntity {
   partnerType: string;
 
   @Column({
-    unique:true,
-    nullable:true,
-    enum:ProfileSetup,
-    default:ProfileSetup.PENDING
+    unique: false,
+    nullable: true,
+    enum: ProfileSetup,
+    default: ProfileSetup.PENDING,
   })
   profileSetup: string;
 
-  @OneToOne(() => Individual)
+  @OneToOne(() => Individual, (individual) => individual.partner)
   @JoinColumn()
-  indiviualDetails: Individual;
+  individualDetails: Individual;
 
-  @OneToOne(() => Company)
+  @OneToOne(() => Company, (company) => company.partner)
   @JoinColumn()
-  companyDetail: Company;
+  companyDetails: Company;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -67,7 +71,7 @@ export class Partner extends BaseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  toJson() {
+  toJSON() {
     return { ...this, id: undefined };
   }
 }

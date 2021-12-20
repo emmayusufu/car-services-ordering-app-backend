@@ -40,7 +40,7 @@ export class Client extends BaseEntity {
   phoneNumber: string;
   
   @Column({
-    unique:true,
+    unique:false,
     nullable:true,
     enum:PhoneNumberVerification,
     default:PhoneNumberVerification.PENDING
@@ -48,7 +48,7 @@ export class Client extends BaseEntity {
   phoneNumberVerification: string;
 
   @Column({
-    unique:true,
+    unique:false,
     nullable:true,
     enum:ProfileSetup,
     default:ProfileSetup.PENDING
@@ -59,9 +59,9 @@ export class Client extends BaseEntity {
   createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt: Date; 
 
-  toJson() {
+  toJSON() {
     return { ...this, id: undefined };
   }
 }

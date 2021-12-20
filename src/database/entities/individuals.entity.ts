@@ -6,9 +6,11 @@ import {
   Generated,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne
 } from "typeorm";
+import { Partner } from "./partners.entity";
 
-Entity({ name: "individuals" });
+@Entity({ name: "individuals" })
 export class Individual extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -32,13 +34,16 @@ export class Individual extends BaseEntity {
   })
   lastName: string;
 
+  @OneToOne(()=>Partner,partner=>partner.individualDetails)
+  partner:Partner
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
 
-  toJson() {
+  toJSON() {
     return { ...this, id: undefined };
   }
 }

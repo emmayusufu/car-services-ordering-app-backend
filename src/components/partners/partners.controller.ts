@@ -1,8 +1,12 @@
 import { RequestHandler } from "express";
 import { Partner } from "../../database/entities/partners.entity";
-import { PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
+import {
+  PartnerType,
+  PhoneNumberVerification,
+  ProfileSetup,
+} from "../../enums/enums";
 import { generateOTP, sendSMS } from "../../utils/helpers";
-import { redisClient } from "../../utils/redis";
+import { storeValue, getValue } from "../../utils/redis";
 // import jwt from "jsonwebtoken";
 import { Individual } from "../../database/entities/individuals.entity";
 import { Company } from "../../database/entities/companies.entity";
@@ -10,7 +14,9 @@ import { Company } from "../../database/entities/companies.entity";
 class PartnersController {
   getAll: RequestHandler = async (_req, res, next) => {
     try {
-      const partners = await Partner.find();
+      const partners = await Partner.find({
+        relations: ["individualDetails", "companyDetails"],
+      });
       res.status(200).json(partners);
     } catch (error) {
       next(new Error(error));
@@ -35,7 +41,7 @@ class PartnersController {
       phoneNumber: string;
     };
     try {
-      const value = await redisClient.get(phoneNumber);
+      const value = await getValue(phoneNumber);
       if (value) {
         if (otp === value) {
           const partner = await Partner.findOne({ phoneNumber });
@@ -45,7 +51,7 @@ class PartnersController {
             partner.phoneNumberVerification = PhoneNumberVerification.COMPLETE;
             await partner.save();
           }
-          res.status(200).json();
+          res.status(200).json({partner});
         } else {
           res.json({ message: "incorrect otp" });
         }
@@ -62,8 +68,8 @@ class PartnersController {
     const otp = generateOTP();
     try {
       const partner = await Partner.findOne({ phoneNumber });
-      await redisClient.setEx(phoneNumber, 360, otp);
-      await sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
+      await storeValue(phoneNumber, otp, 360);
+      // await sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
       if (partner) {
         res.status(200).json();
       } else {
@@ -89,8 +95,9 @@ class PartnersController {
       await individual.save();
 
       const partner = await Partner.findOne({ uuid });
-      partner.indiviualDetails = individual;
-      partner.profileSetup = ProfileSetup.COMPLETE
+      partner.individualDetails = individual;
+      partner.profileSetup = ProfileSetup.COMPLETE;
+      partner.partnerType = PartnerType.INDIVIDUAL;
       await partner.save();
 
       res.status(201).json();
@@ -109,8 +116,9 @@ class PartnersController {
       (company.companyName = companyName), await company.save();
 
       const partner = await Partner.findOne({ uuid });
-      partner.companyDetail = company;
-      partner.profileSetup = ProfileSetup.COMPLETE
+      partner.companyDetails = company;
+      partner.profileSetup = ProfileSetup.COMPLETE;
+      partner.partnerType = PartnerType.COMPANY;
       await partner.save();
 
       res.status(201).json();

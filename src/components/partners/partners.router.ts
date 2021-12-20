@@ -15,8 +15,9 @@ class PartnersRouter implements AppRouter {
     this.router.get("/",this.controller.getAll)
     this.router.get("/:uuid",this.controller.getOne)
     this.router.post("/verify-otp",this.controller.verifyOtp)
-    // this.router.post("/profile-setup",this.controller.profileSetup)
     this.router.post("/verify-phonenumber",this.controller.verifyPhoneNumber)
+    this.router.post("/individual-profile-setup/:uuid",this.controller.individualProfileSetup)
+    this.router.post("/company-profile-setup/:uuid",this.controller.companyProfileSetup)
   }
 }
 
