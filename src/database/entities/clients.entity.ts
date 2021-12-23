@@ -1,26 +1,12 @@
 import {
-  BaseEntity,
-  PrimaryGeneratedColumn,
   Column,
   Entity,
-  Generated,
-  CreateDateColumn,
-  UpdateDateColumn,
 } from "typeorm";
 import { PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
+import { Model } from "./model";
 
 @Entity({ name: "clients" })
-export class Client extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Generated("uuid")
-  @Column({
-    unique:true,
-    nullable:false
-  })
-  uuid: string;
- 
+export class Client extends Model {
   @Column({
     unique:false,
     nullable:true,
@@ -54,14 +40,4 @@ export class Client extends BaseEntity {
     default:ProfileSetup.PENDING
   })
   profileSetup: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date; 
-
-  toJSON() {
-    return { ...this, id: undefined };
-  }
 }

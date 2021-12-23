@@ -10,6 +10,9 @@ import { storeValue, getValue } from "../../utils/redis";
 // import jwt from "jsonwebtoken";
 import { Individual } from "../../database/entities/individuals.entity";
 import { Company } from "../../database/entities/companies.entity";
+import { CarWash } from "../../database/entities/car_wash.entity";
+import { CarServicing } from "../../database/entities/car_servicing.entity";
+import { EmergencyRescue } from "../../database/entities/emergency_rescue.entity";
 
 class PartnersController {
   getAll: RequestHandler = async (_req, res, next) => {
@@ -51,7 +54,7 @@ class PartnersController {
             partner.phoneNumberVerification = PhoneNumberVerification.COMPLETE;
             await partner.save();
           }
-          res.status(200).json({partner});
+          res.status(200).json({ partner });
         } else {
           res.json({ message: "incorrect otp" });
         }
@@ -122,6 +125,58 @@ class PartnersController {
       await partner.save();
 
       res.status(201).json();
+    } catch (error) {
+      next(new Error(error));
+    }
+  };
+
+  registerServices: RequestHandler = async (req, res, next) => {
+    const { carWash, carServicing, emergencyRescue } = req.body as {
+      carWash: {
+        inCall: boolean;
+        outCall: boolean;
+      };
+      carServicing: {
+        inCall: boolean;
+        outCall: boolean;
+        engineOil: boolean;
+        gearboxOil: boolean;
+        sparkPlugs: boolean;
+        airFilter: boolean;
+        brakePads: boolean;
+        tyres: boolean;
+      };
+      emergencyRescue: {
+        carTowing: boolean;
+        jumpStarting: boolean;
+      };
+    };
+
+    try {
+      if (carServicing) {
+        const row = new CarServicing();
+        row.inCall = carServicing.inCall;
+        row.outCall = carServicing.outCall;
+        row.engineOil = carServicing.engineOil;
+        row.gearboxOil = carServicing.gearboxOil;
+        row.sparkPlugs = carServicing.sparkPlugs;
+        row.airFilter = carServicing.airFilter;
+        row.brakePads = carServicing.brakePads;
+        row.tyres = carServicing.tyres;
+        await row.save();
+      }
+      if (carWash) {
+        const row = new CarWash();
+        row.inCall = carWash.inCall;
+        row.outCall = carWash.outCall;
+        await row.save();
+      }
+      if (emergencyRescue) {
+        const row = new EmergencyRescue();
+        row.carTowing = emergencyRescue.carTowing;
+        row.jumpStarting = emergencyRescue.jumpStarting;
+        await row.save();
+      }
     } catch (error) {
       next(new Error(error));
     }

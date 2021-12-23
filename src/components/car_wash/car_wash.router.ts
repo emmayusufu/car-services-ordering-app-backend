@@ -6,6 +6,15 @@ class CarWashRouter implements AppRouter {
     path = "/car-wash";
     router = Router();
     controller = new CarWashController()
+
+    constructor () {
+        this.initializeRoutes()
+    }
+
+
+    initializeRoutes () {
+        this.router.post("/order",this.controller.orderCarWash)
+    }
 }
 
 export default CarWashRouter

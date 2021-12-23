@@ -6,6 +6,14 @@ class EmergencyRescueRouter implements AppRouter {
   path = "/emergency-rescue";
   router = Router();
   controller = new EmergencyRescueController();
+
+  constructor() {
+    this.initializeRoutes();
+  }
+
+  initializeRoutes() {
+    this.router.post("/order", this.controller.orderEmergencyRescue);
+  }
 }
 
 export default EmergencyRescueRouter;

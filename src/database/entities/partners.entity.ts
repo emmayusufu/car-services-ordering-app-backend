@@ -1,11 +1,6 @@
 import {
-  BaseEntity,
-  PrimaryGeneratedColumn,
   Column,
   Entity,
-  Generated,
-  CreateDateColumn,
-  UpdateDateColumn,
   JoinColumn,
   OneToOne,
 } from "typeorm";
@@ -16,19 +11,10 @@ import {
 } from "../../enums/enums";
 import { Company } from "./companies.entity";
 import { Individual } from "./individuals.entity";
+import { Model } from "./model";
 
 @Entity({ name: "partners" })
-export class Partner extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Generated("uuid")
-  @Column({
-    unique: true,
-    nullable: false,
-  })
-  uuid: string;
-
+export class Partner extends Model {
   @Column({
     unique: true,
     nullable: true,
@@ -64,14 +50,4 @@ export class Partner extends BaseEntity {
   @OneToOne(() => Company, (company) => company.partner)
   @JoinColumn()
   companyDetails: Company;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  toJSON() {
-    return { ...this, id: undefined };
-  }
 }

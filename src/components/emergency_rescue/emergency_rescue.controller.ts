@@ -1,3 +1,12 @@
-class EmergencyRescueController {}
+import { RequestHandler } from "express";
 
-export default EmergencyRescueController
+class EmergencyRescueController {
+  orderEmergencyRescue: RequestHandler = async (req, res, next) => {
+    try {
+    } catch (error) {
+      next(new Error(error));
+    }
+  };
+}
+
+export default EmergencyRescueController;

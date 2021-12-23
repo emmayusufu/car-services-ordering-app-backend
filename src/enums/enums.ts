@@ -3,7 +3,7 @@ export enum Condition {
   USED = "used",
 }
 
-export enum PartnerRoles {
+export enum PartnerRoles { 
   MECHANIC = "mechanic",
 }
 

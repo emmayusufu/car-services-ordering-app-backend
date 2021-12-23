@@ -1,3 +1,7 @@
-class CarServicingController {}
+import { RequestHandler } from "express";
 
-export default CarServicingController
+class CarServicingController {
+  orderCarServicing: RequestHandler = async (req, res, next) => {};
+}
+
+export default CarServicingController;
