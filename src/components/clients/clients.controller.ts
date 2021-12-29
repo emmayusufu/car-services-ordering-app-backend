@@ -36,12 +36,12 @@ class ClientsController {
       await storeValue(phoneNumber, otp, 360);
       // await sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
       if (client) {
-        res.status(200).json(); 
+        res.status(200).json({ message: "client_already_exists",phoneNumber:client.phoneNumber });
       } else {
         const newClient = new Client();
         newClient.phoneNumber = phoneNumber;
         await newClient.save();
-        res.status(201).json();
+        res.status(201).json({ message: "new_client_created",phoneNumber:newClient.phoneNumber });
       }
     } catch (error) {
       next(new Error(error));
@@ -53,6 +53,7 @@ class ClientsController {
       otp: string;
       phoneNumber: string;
     };
+    console.log(phoneNumber,otp)
     try {
       const value = await getValue(phoneNumber);
       if (value) {
@@ -64,7 +65,19 @@ class ClientsController {
             client.phoneNumberVerification = PhoneNumberVerification.COMPLETE;
             await client.save();
           }
-          res.status(200).json();
+          if (ProfileSetup.PENDING) {
+            res.status(200).json({ message: "profile_setup_pending",uuid:client.uuid });
+          } else if (ProfileSetup.COMPLETE) {
+            res
+              .status(200)
+              .json({
+                message: "profile_setup_complete",
+                uuid:client.uuid,
+                firstName: client.firstName,
+                lastName: client.lastName,
+                phoneNumber: client.phoneNumber,
+              });
+          }
         } else {
           res.json({ message: "incorrect otp" });
         }
@@ -95,10 +108,10 @@ class ClientsController {
         );
 
         res.status(200).json({
+          uuid:client.uuid,
           firstName: client.firstName,
           lastName: client.lastName,
           phoneNumber: client.phoneNumber,
-          accessToken,
         });
       } else {
         res.status(405).json();

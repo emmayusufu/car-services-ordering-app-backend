@@ -1,11 +1,10 @@
 import { createClient } from "redis";
 
-const client = createClient({url: 'redis://localhost:6379'});
-
-client.on("error", (err) => console.log("Redis Client Error", err));
+const client = createClient({ url: "redis://localhost:6379" });
 
 (async () => {
   await client.connect();
+  client.on("error", (err) => console.log("Redis Client Error", err));
 })();
 
 const storeValue = async (key: string, value: string, exp: number) => {

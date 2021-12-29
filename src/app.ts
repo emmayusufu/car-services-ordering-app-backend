@@ -1,8 +1,9 @@
-import express from "express";
+import express, { NextFunction,Request,Response } from "express";
 import http from "http";
 import { AppRouter } from "./interfaces/interfaces";
 import {createConnection} from "typeorm";
 import morgan from "morgan";
+import { logger } from "./utils/logger";
 
 class App {
   app = express();
@@ -18,7 +19,10 @@ class App {
   listen = () => {
     createConnection().then(()=>{
         this.server.listen(this.port, () => {
-            console.log(`Server is running on http://localhost:${this.port}`);
+          logger.info(`=================================`);
+          logger.info(`======= ENV: ${this.env} =======`);
+          logger.info(`App listening on the port ${this.port}`);
+          logger.info(`=================================`);
         });
     })
   };
@@ -34,6 +38,20 @@ class App {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(morgan("dev"))
   };
+
+  initializeErrorHandling() {
+    this.app.use(
+      (error: Error, req: Request, res: Response, _next: NextFunction) => {
+        //   const status = error.status || 500;
+        const message = error.message || "Something went wrong";
+        logger.error(
+          `[${req.method}] ${req.path} >> StatusCode:: {status}, Message:: ${message}`
+        );
+        res.status(500).json({ message });
+      }
+    );
+  }
+
 }
 
 export default App;

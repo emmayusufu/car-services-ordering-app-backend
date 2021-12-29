@@ -13,7 +13,6 @@
       "typescript": "^3.3.3333"
    },
    "dependencies": {
-      "africastalking": "^0.5.4",
       "africastalking-ts": "^0.0.3",
       "dotenv": "^8.6.0",
       "express": "^4.17.1",
@@ -23,7 +22,10 @@
       "pg": "^8.7.1",
       "redis": "^4.0.1",
       "reflect-metadata": "^0.1.10",
-      "typeorm": "^0.2.41"
+      "typeorm": "^0.2.41",
+      "winston": "^3.3.3",
+      "winston-daily-rotate": "^0.0.1",
+      "winston-daily-rotate-file": "^4.5.5"
    },
    "scripts": {
       "dev": "nodemon -e ts,json,js,env --exec npm start",

@@ -14,9 +14,9 @@ class ClientsRouter implements AppRouter {
     initializeRoutes(){
         this.router.get("/",this.controller.getAll)
         this.router.get("/:uuid",this.controller.getOne)
-        this.router.put("/verify-otp",this.controller.verifyOtp)
+        this.router.put("/otp-verification",this.controller.verifyOtp)
         this.router.put("/profile-setup/:uuid",this.controller.profileSetup)
-        this.router.post("/verify-phonenumber",this.controller.verifyPhoneNumber)
+        this.router.post("/phone-number-verification",this.controller.verifyPhoneNumber)
     }
 }
 
