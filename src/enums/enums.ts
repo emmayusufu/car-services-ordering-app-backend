@@ -17,6 +17,12 @@ export enum ProfileSetup {
   COMPLETE = "complete",
 }
 
+export enum OrderStatus {
+  PENDING = "pending",
+  COMPLETE = "complete",
+  CANCELLED = "cancelled",
+}
+
 export enum PartnerType {
   COMPANY = "company",
   INDIVIDUAL = "individual"

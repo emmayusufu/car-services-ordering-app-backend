@@ -13,6 +13,7 @@
       "typescript": "^3.3.3333"
    },
    "dependencies": {
+      "@googlemaps/google-maps-services-js": "^3.3.5",
       "africastalking-ts": "^0.0.3",
       "dotenv": "^8.6.0",
       "express": "^4.17.1",
