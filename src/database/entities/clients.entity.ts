@@ -1,9 +1,11 @@
 import {
   Column,
   Entity,
+  OneToMany,
 } from "typeorm";
 import { PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
 import { Model } from "./model";
+import { Order } from "./orders.entity";
 
 @Entity({ name: "clients" })
 export class Client extends Model {
@@ -40,4 +42,7 @@ export class Client extends Model {
     default:ProfileSetup.PENDING
   })
   profileSetup: string;
+
+  @OneToMany(()=>Order,order=>order.client)
+  orders:Order[]
 }

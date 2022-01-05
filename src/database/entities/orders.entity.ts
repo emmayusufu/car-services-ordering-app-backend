@@ -1,4 +1,4 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, ManyToOne } from "typeorm";
 import { OrderStatus } from "../../enums/enums";
 import { Client } from "./clients.entity";
 import { Model } from "./model";
@@ -6,16 +6,10 @@ import { Partner } from "./partners.entity";
 
 @Entity({ name: "orders" })
 export class Order extends Model {
-  @Column({
-    unique: false,
-    nullable: false,
-  })
+  @ManyToOne(() => Client, (client) => client.orders)
   client: Client;
 
-  @Column({
-    unique: false,
-    nullable: false,
-  })
+  @ManyToOne(() => Partner, (partner) => partner.orders)
   partner: Partner;
 
   @Column({

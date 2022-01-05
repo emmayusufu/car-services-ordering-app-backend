@@ -5,16 +5,21 @@ import {
   PhoneNumberVerification,
   ProfileSetup,
 } from "../../enums/enums";
-import { generateOTP, sendSMS } from "../../utils/helpers";
-import { storeValue, getValue } from "../../utils/redis";
+import { generateOTP } from "../../utils/helpers";
 // import jwt from "jsonwebtoken";
 import { Individual } from "../../database/entities/individuals.entity";
 import { Company } from "../../database/entities/companies.entity";
 import { CarWash } from "../../database/entities/car_wash.entity";
 import { CarServicing } from "../../database/entities/car_servicing.entity";
 import { EmergencyRescue } from "../../database/entities/emergency_rescue.entity";
+import RedisClient from "../../utils/redis-client";
+import AfricasTalkingClient from "../../utils/africastalking-client";
 
 class PartnersController {
+
+  private redisClient = RedisClient.getInstance()
+  private africasTalkingClient  = AfricasTalkingClient.getInstance()
+
   getAll: RequestHandler = async (_req, res, next) => {
     try {
       const partners = await Partner.find({
@@ -44,7 +49,7 @@ class PartnersController {
       phoneNumber: string;
     };
     try {
-      const value = await getValue(phoneNumber);
+      const value = await this.redisClient.getValue(phoneNumber);
       if (value) {
         if (otp === value) {
           const partner = await Partner.findOne({ phoneNumber });
@@ -71,8 +76,8 @@ class PartnersController {
     const otp = generateOTP();
     try {
       const partner = await Partner.findOne({ phoneNumber });
-      await storeValue(phoneNumber, otp, 360);
-      // await sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
+      await this.redisClient.setValue(phoneNumber, otp, 360);
+      await this.africasTalkingClient.sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
       if (partner) {
         res.status(200).json();
       } else {

@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-} from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import {
   PartnerType,
   PhoneNumberVerification,
@@ -12,6 +7,7 @@ import {
 import { Company } from "./companies.entity";
 import { Individual } from "./individuals.entity";
 import { Model } from "./model";
+import { Order } from "./orders.entity";
 
 @Entity({ name: "partners" })
 export class Partner extends Model {
@@ -50,4 +46,7 @@ export class Partner extends Model {
   @OneToOne(() => Company, (company) => company.partner)
   @JoinColumn()
   companyDetails: Company;
+
+  @OneToMany(() => Order, (order) => order.partner)
+  orders: Order[];
 }

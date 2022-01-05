@@ -1,11 +1,15 @@
 import { RequestHandler } from "express";
 import { Client } from "../../database/entities/clients.entity";
 import { PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
-import { generateOTP, sendSMS } from "../../utils/helpers";
-import { storeValue, getValue } from "../../utils/redis";
+import { generateOTP } from "../../utils/helpers";
 import jwt from "jsonwebtoken";
+import RedisClient from "../../utils/redis-client";
+import AfricasTalkingClient from "../../utils/africastalking-client";
 
 class ClientsController {
+  redisClient = RedisClient.getInstance();
+  private africasTalkingClient = AfricasTalkingClient.getInstance();
+
   getAll: RequestHandler = async (_req, res, next) => {
     try {
       const clients = await Client.find();
@@ -33,15 +37,24 @@ class ClientsController {
     try {
       const client = await Client.findOne({ phoneNumber });
 
-      await storeValue(phoneNumber, otp, 360);
-      // await sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
+      await this.redisClient.setValue(phoneNumber, otp, 360);
+      await this.africasTalkingClient.sendSMS(
+        [phoneNumber],
+        `Your otp from Biko Mechanic is : ${otp}`
+      );
       if (client) {
-        res.status(200).json({ message: "client_already_exists",phoneNumber:client.phoneNumber });
+        res.status(200).json({
+          message: "client_already_exists",
+          phoneNumber: client.phoneNumber,
+        });
       } else {
         const newClient = new Client();
         newClient.phoneNumber = phoneNumber;
         await newClient.save();
-        res.status(201).json({ message: "new_client_created",phoneNumber:newClient.phoneNumber });
+        res.status(201).json({
+          message: "new_client_created",
+          phoneNumber: newClient.phoneNumber,
+        });
       }
     } catch (error) {
       next(new Error(error));
@@ -53,9 +66,9 @@ class ClientsController {
       otp: string;
       phoneNumber: string;
     };
-    console.log(phoneNumber,otp)
+    console.log(phoneNumber, otp);
     try {
-      const value = await getValue(phoneNumber);
+      const value = await this.redisClient.getValue(phoneNumber);
       if (value) {
         if (otp === value) {
           const client = await Client.findOne({ phoneNumber });
@@ -66,17 +79,17 @@ class ClientsController {
             await client.save();
           }
           if (ProfileSetup.PENDING) {
-            res.status(200).json({ message: "profile_setup_pending",uuid:client.uuid });
-          } else if (ProfileSetup.COMPLETE) {
             res
               .status(200)
-              .json({
-                message: "profile_setup_complete",
-                uuid:client.uuid,
-                firstName: client.firstName,
-                lastName: client.lastName,
-                phoneNumber: client.phoneNumber,
-              });
+              .json({ message: "profile_setup_pending", uuid: client.uuid });
+          } else if (ProfileSetup.COMPLETE) {
+            res.status(200).json({
+              message: "profile_setup_complete",
+              uuid: client.uuid,
+              firstName: client.firstName,
+              lastName: client.lastName,
+              phoneNumber: client.phoneNumber,
+            });
           }
         } else {
           res.json({ message: "incorrect otp" });
@@ -108,7 +121,7 @@ class ClientsController {
         );
 
         res.status(200).json({
-          uuid:client.uuid,
+          uuid: client.uuid,
           firstName: client.firstName,
           lastName: client.lastName,
           phoneNumber: client.phoneNumber,
