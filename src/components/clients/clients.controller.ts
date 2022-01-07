@@ -7,8 +7,8 @@ import RedisClient from "../../utils/redis-client";
 import AfricasTalkingClient from "../../utils/africastalking-client";
 
 class ClientsController {
-  redisClient = RedisClient.getInstance();
-  private africasTalkingClient = AfricasTalkingClient.getInstance();
+  private _redisClient = RedisClient.getInstance();
+  private _africasTalkingClient = AfricasTalkingClient.getInstance();
 
   getAll: RequestHandler = async (_req, res, next) => {
     try {
@@ -37,10 +37,10 @@ class ClientsController {
     try {
       const client = await Client.findOne({ phoneNumber });
 
-      await this.redisClient.setValue(phoneNumber, otp, 360);
-      await this.africasTalkingClient.sendSMS(
+      await this._redisClient.setValue(phoneNumber, otp, 360);
+      await this._africasTalkingClient.sendSMS(
         [phoneNumber],
-        `Your otp from Biko Mechanic is : ${otp}`
+        `Your OTP from Biko Mechanic is : ${otp}`
       );
       if (client) {
         res.status(200).json({
@@ -68,7 +68,7 @@ class ClientsController {
     };
     console.log(phoneNumber, otp);
     try {
-      const value = await this.redisClient.getValue(phoneNumber);
+      const value = await this._redisClient.getValue(phoneNumber);
       if (value) {
         if (otp === value) {
           const client = await Client.findOne({ phoneNumber });

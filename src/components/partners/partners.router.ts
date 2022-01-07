@@ -14,11 +14,11 @@ class PartnersRouter implements AppRouter {
   initializeRoutes() {
     this.router.get("/",this.controller.getAll)
     this.router.get("/:uuid",this.controller.getOne)
-    this.router.post("/verify-otp",this.controller.verifyOtp)
-    this.router.post("/verify-phonenumber",this.controller.verifyPhoneNumber)
-    this.router.post("/individual-profile-setup/:uuid",this.controller.individualProfileSetup)
-    this.router.post("/company-profile-setup/:uuid",this.controller.companyProfileSetup)
-    this.router.post("/register-services",this.controller.registerServices)
+    this.router.post("/phonenumber-verification",this.controller.verifyPhoneNumber)
+    this.router.post("/otp-verification",this.controller.verifyOtp)
+    this.router.put("/individual-profile-setup/:uuid",this.controller.individualProfileSetup)
+    this.router.put("/company-profile-setup/:uuid",this.controller.companyProfileSetup)
+    this.router.post("/service-registration/:uuid",this.controller.registerServices)
   }
 }
 

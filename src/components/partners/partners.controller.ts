@@ -1,24 +1,19 @@
 import { RequestHandler } from "express";
 import { Partner } from "../../database/entities/partners.entity";
 import {
-  PartnerType,
+  AccountType,
   PhoneNumberVerification,
   ProfileSetup,
 } from "../../enums/enums";
 import { generateOTP } from "../../utils/helpers";
-// import jwt from "jsonwebtoken";
 import { Individual } from "../../database/entities/individuals.entity";
 import { Company } from "../../database/entities/companies.entity";
-import { CarWash } from "../../database/entities/car_wash.entity";
-import { CarServicing } from "../../database/entities/car_servicing.entity";
-import { EmergencyRescue } from "../../database/entities/emergency_rescue.entity";
 import RedisClient from "../../utils/redis-client";
 import AfricasTalkingClient from "../../utils/africastalking-client";
 
 class PartnersController {
-
-  private redisClient = RedisClient.getInstance()
-  private africasTalkingClient  = AfricasTalkingClient.getInstance()
+  private _redisClient = RedisClient.getInstance();
+  private _africasTalkingClient = AfricasTalkingClient.getInstance();
 
   getAll: RequestHandler = async (_req, res, next) => {
     try {
@@ -49,7 +44,7 @@ class PartnersController {
       phoneNumber: string;
     };
     try {
-      const value = await this.redisClient.getValue(phoneNumber);
+      const value = await this._redisClient.getValue(phoneNumber);
       if (value) {
         if (otp === value) {
           const partner = await Partner.findOne({ phoneNumber });
@@ -76,8 +71,11 @@ class PartnersController {
     const otp = generateOTP();
     try {
       const partner = await Partner.findOne({ phoneNumber });
-      await this.redisClient.setValue(phoneNumber, otp, 360);
-      await this.africasTalkingClient.sendSMS([phoneNumber], `Your otp from BIKO Mechanic is : ${otp}`);
+      await this._redisClient.setValue(phoneNumber, otp, 360);
+      await this._africasTalkingClient.sendSMS(
+        [phoneNumber],
+        `Your OTP from BIKO Mechanic is : ${otp}`
+      );
       if (partner) {
         res.status(200).json();
       } else {
@@ -105,7 +103,7 @@ class PartnersController {
       const partner = await Partner.findOne({ uuid });
       partner.individualDetails = individual;
       partner.profileSetup = ProfileSetup.COMPLETE;
-      partner.partnerType = PartnerType.INDIVIDUAL;
+      partner.accountType = AccountType.INDIVIDUAL;
       await partner.save();
 
       res.status(201).json();
@@ -126,7 +124,7 @@ class PartnersController {
       const partner = await Partner.findOne({ uuid });
       partner.companyDetails = company;
       partner.profileSetup = ProfileSetup.COMPLETE;
-      partner.partnerType = PartnerType.COMPANY;
+      partner.accountType = AccountType.COMPANY;
       await partner.save();
 
       res.status(201).json();
@@ -137,51 +135,17 @@ class PartnersController {
 
   registerServices: RequestHandler = async (req, res, next) => {
     const { carWash, carServicing, emergencyRescue } = req.body as {
-      carWash: {
-        inCall: boolean;
-        outCall: boolean;
-      };
-      carServicing: {
-        inCall: boolean;
-        outCall: boolean;
-        engineOil: boolean;
-        gearboxOil: boolean;
-        sparkPlugs: boolean;
-        airFilter: boolean;
-        brakePads: boolean;
-        tyres: boolean;
-      };
-      emergencyRescue: {
-        carTowing: boolean;
-        jumpStarting: boolean;
-      };
+      carWash: boolean;
+      carServicing: boolean;
+      emergencyRescue: boolean;
     };
-
     try {
-      if (carServicing) {
-        const row = new CarServicing();
-        row.inCall = carServicing.inCall;
-        row.outCall = carServicing.outCall;
-        row.engineOil = carServicing.engineOil;
-        row.gearboxOil = carServicing.gearboxOil;
-        row.sparkPlugs = carServicing.sparkPlugs;
-        row.airFilter = carServicing.airFilter;
-        row.brakePads = carServicing.brakePads;
-        row.tyres = carServicing.tyres;
-        await row.save();
-      }
-      if (carWash) {
-        const row = new CarWash();
-        row.inCall = carWash.inCall;
-        row.outCall = carWash.outCall;
-        await row.save();
-      }
-      if (emergencyRescue) {
-        const row = new EmergencyRescue();
-        row.carTowing = emergencyRescue.carTowing;
-        row.jumpStarting = emergencyRescue.jumpStarting;
-        await row.save();
-      }
+      const partner = new Partner();
+      (partner.carWash = carWash || false),
+        (partner.carServicing = carServicing || false);
+      partner.emergencyRescue = emergencyRescue || false;
+      await partner.save();
+      res.json({ message: "success" });
     } catch (error) {
       next(new Error(error));
     }

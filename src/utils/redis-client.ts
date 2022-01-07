@@ -3,7 +3,8 @@ import { logger } from "./logger";
 
 class RedisClient {
   private static instance :RedisClient
-  private client = createClient({ url: "redis://localhost:6379" });
+  private client = createClient();
+  // { url: "redis://localhost:6379" }
 
   private constructor() {
     this.initializeRedisClient()

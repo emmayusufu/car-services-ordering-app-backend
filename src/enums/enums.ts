@@ -1,12 +1,3 @@
-export enum Condition {
-  NEW = "new",
-  USED = "used",
-}
-
-export enum PartnerRoles { 
-  MECHANIC = "mechanic",
-}
-
 export enum PhoneNumberVerification {
   PENDING = "pending",
   COMPLETE = "complete",
@@ -23,7 +14,14 @@ export enum OrderStatus {
   CANCELLED = "cancelled",
 }
 
-export enum PartnerType {
+export enum AccountType {
   COMPANY = "company",
   INDIVIDUAL = "individual"
+}
+
+export enum PartnerAccountStatus {
+  WAITING_APPROVAL = "waiting_approval",
+  SUSPENDED = "suspended",
+  PROFILE_SETUP_COMPLETE  ="profile_setup_complete",
+  PROFILE_SETUP_PENDING = "profile_setup_pending" 
 }
