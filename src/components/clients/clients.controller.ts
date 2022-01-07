@@ -66,18 +66,11 @@ class ClientsController {
       otp: string;
       phoneNumber: string;
     };
-    console.log(phoneNumber, otp);
     try {
       const value = await this._redisClient.getValue(phoneNumber);
       if (value) {
         if (otp === value) {
-          const client = await Client.findOne({ phoneNumber });
-          if (
-            client.phoneNumberVerification === PhoneNumberVerification.PENDING
-          ) {
-            client.phoneNumberVerification = PhoneNumberVerification.COMPLETE;
-            await client.save();
-          }
+          const client = await Client.findOne({ where:{phoneNumber:phoneNumber} });
           if (ProfileSetup.PENDING) {
             res
               .status(200)
