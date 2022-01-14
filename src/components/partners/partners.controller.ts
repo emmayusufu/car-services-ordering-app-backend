@@ -70,6 +70,7 @@ class PartnersController {
       otp: string;
       phoneNumber: string;
     };
+    console.log(otp,phoneNumber)
     try {
       const value = await this._redisClient.getValue(phoneNumber);
       if (value) {
@@ -135,6 +136,7 @@ class PartnersController {
     const { companyName } = req.body as {
       companyName: string;
     };
+    console.log(uuid,companyName)
     try {
       const company = new Company();
       (company.companyName = companyName), await company.save();

@@ -19,9 +19,7 @@ export enum AccountType {
   INDIVIDUAL = "individual"
 }
 
-export enum PartnerAccountStatus {
+export enum AccountStatus {
   WAITING_APPROVAL = "waiting_approval",
   SUSPENDED = "suspended",
-  PROFILE_SETUP_COMPLETE  ="profile_setup_complete",
-  PROFILE_SETUP_PENDING = "profile_setup_pending" 
 }

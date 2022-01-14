@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
 import {
   AccountType,
-  PartnerAccountStatus,
+  AccountStatus,
   PhoneNumberVerification,
   ProfileSetup,
 } from "../../enums/enums";
@@ -35,15 +35,7 @@ export class Partner extends Model {
     default:false
   })
   carServicing: boolean;
-  
-
-  @Column({
-    unique: false,
-    enum: PhoneNumberVerification,
-    default: PhoneNumberVerification.PENDING,
-  })
-  phoneNumberVerification: string;
-
+ 
   @Column({
     unique: false,
     nullable: true,
@@ -54,17 +46,17 @@ export class Partner extends Model {
   @Column({
     unique: false,
     nullable: true,
-    enum: PartnerAccountStatus,
-  })
-  accountStatus: string;
-
-  @Column({
-    unique: false,
-    nullable: true,
     enum: ProfileSetup,
     default: ProfileSetup.PENDING,
   })
   profileSetup: string;
+
+  @Column({
+    unique: false,
+    nullable: true,
+    enum: AccountStatus,
+  })
+  accountStatus: string;
 
   @OneToOne(() => Individual, (individual) => individual.partner)
   @JoinColumn()
