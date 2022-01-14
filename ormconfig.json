@@ -3,7 +3,7 @@
    "host": "localhost",
    "port": 5432,
    "username": "postgres",
-   "password": "root",
+   "password": "240063",
    "database": "biko_mechanic",
    "synchronize": true,
    "logging": false,

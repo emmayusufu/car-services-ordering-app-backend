@@ -16,7 +16,7 @@ export class Order extends Model {
     unique: false,
     nullable: false,
   })
-  type: string;
+  service: string;
 
   @Column({
     unique: false,
