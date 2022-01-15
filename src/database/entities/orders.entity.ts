@@ -7,21 +7,21 @@ import { Partner } from "./partners.entity";
 @Entity({ name: "orders" })
 export class Order extends Model {
   @ManyToOne(() => Client, (client) => client.orders)
-  client: Client;
+  client: Client | undefined ;
 
   @ManyToOne(() => Partner, (partner) => partner.orders)
-  partner: Partner;
+  partner: Partner | undefined ;
 
   @Column({
     unique: false,
     nullable: false,
   })
-  service: string;
+  service: string | undefined ;
 
   @Column({
     unique: false,
     nullable: false,
     enum: OrderStatus,
   })
-  status: string;
+  status: string | undefined ;
 }

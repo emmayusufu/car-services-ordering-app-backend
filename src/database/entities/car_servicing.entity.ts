@@ -7,54 +7,54 @@ export class CarServicing extends Model {
     unique: false,
     default: false,
   })
-  engineOil: boolean;
+  engineOil: boolean  | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  gearboxOil: boolean;
+  gearboxOil: boolean | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  airFilter: boolean;
+  airFilter: boolean | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  sparkPlugs: boolean;
+  sparkPlugs: boolean | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  brakePads: boolean;
+  brakePads: boolean | undefined ;
   
   @Column({
     unique: false,
     default: false,
   })
-  belts: boolean;
+  belts: boolean | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  tyres: boolean;
+  tyres: boolean | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  inCall: boolean;
+  inCall: boolean | undefined ;
   
   @Column({
     unique: false,
     default: false,
   })
-  outCall: boolean;
+  outCall: boolean | undefined ;
 
 }

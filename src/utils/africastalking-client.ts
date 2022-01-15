@@ -2,8 +2,8 @@ import { Client } from "africastalking-ts";
 
 class AfricasTalkingClient {
   private _client = new Client({
-    apiKey: process.env.AFRICASTALKING_API_KEY,
-    username: process.env.AFRICASTALKING_USERNAME,
+    apiKey: process.env.AFRICASTALKING_API_KEY!,
+    username: process.env.AFRICASTALKING_USERNAME!,
   });
 
   private static _instance: AfricasTalkingClient;

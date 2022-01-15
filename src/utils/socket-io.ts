@@ -1,17 +1,20 @@
-import socket from "socket.io";
+import { Server } from "socket.io";
 import http from "http";
 
 class SocketIO {
-  private IO = null;
+  private IO: Server | null = null;
 
   constructor(server: http.Server) {
-    this.IO = new socket.Server(server, {
+    this.IO = new Server(server, {
       cors: { origin: "*" },
     });
   }
 
-  getIO = ():socket.Socket => {
-    if (this.IO != null) return this.IO;
+  getIO = (): Server | null => {
+    if(this.IO){
+      return this.IO
+    }
+    return this.IO;
   };
 }
 

@@ -9,20 +9,20 @@ import {
 
 export abstract class Model extends BaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id:  | undefined ;
 
   @Generated("uuid")
   @Column({
     unique: true,
     nullable: false,
   })
-  uuid: string;
+  uuid: string | undefined ;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date | undefined ;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt: Date | undefined ;
 
   toJSON() {
     return { ...this, id: undefined };

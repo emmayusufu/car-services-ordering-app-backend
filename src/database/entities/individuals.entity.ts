@@ -12,14 +12,14 @@ export class Individual extends Model {
     unique: false,
     nullable: true,
   })
-  firstName: string;
+  firstName: string | null | undefined  ;
 
   @Column({
     unique: false,
     nullable: true,
   })
-  lastName: string;
+  lastName!: string | null ;
 
   @OneToOne(()=>Partner,partner=>partner.individualDetails)
-  partner:Partner
+  partner:Partner | undefined 
 }

@@ -3,7 +3,7 @@ import { Client } from "../../database/entities/clients.entity";
 import { PhoneNumberVerification, ProfileSetup } from "../../enums/enums";
 import { generateOTP } from "../../utils/helpers";
 import jwt from "jsonwebtoken";
-import RedisClient from "../../utils/redis-client";
+import RedisClient from "../../utils/redis-manager";
 import AfricasTalkingClient from "../../utils/africastalking-client";
 
 class ClientsController {
@@ -15,7 +15,9 @@ class ClientsController {
       const clients = await Client.find();
       res.status(200).json(clients);
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -27,7 +29,9 @@ class ClientsController {
       const client = await Client.findOne({ uuid });
       res.status(200).json({ client });
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -57,7 +61,9 @@ class ClientsController {
         });
       }
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -70,19 +76,21 @@ class ClientsController {
       const value = await this._redisClient.getValue(phoneNumber);
       if (value) {
         if (otp === value) {
-          const client = await Client.findOne({ where:{phoneNumber:phoneNumber} });
-          if (ProfileSetup.PENDING) {
-            res
-              .status(200)
-              .json({ message: "profile_setup_pending", uuid: client.uuid });
-          } else if (ProfileSetup.COMPLETE) {
-            res.status(200).json({
-              message: "profile_setup_complete",
-              uuid: client.uuid,
-              firstName: client.firstName,
-              lastName: client.lastName,
-              phoneNumber: client.phoneNumber,
-            });
+          const client = await Client.findOne({ where: { phoneNumber: phoneNumber } });
+          if (client) {
+            if (ProfileSetup.PENDING) {
+              res
+                .status(200)
+                .json({ message: "profile_setup_pending", uuid: client.uuid });
+            } else if (ProfileSetup.COMPLETE) {
+              res.status(200).json({
+                message: "profile_setup_complete",
+                uuid: client.uuid,
+                firstName: client.firstName,
+                lastName: client.lastName,
+                phoneNumber: client.phoneNumber,
+              });
+            }
           }
         } else {
           res.json({ message: "incorrect otp" });
@@ -91,7 +99,9 @@ class ClientsController {
         res.json({ message: "otp not found" });
       }
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -100,19 +110,12 @@ class ClientsController {
     const { firstName, lastName } = req.body;
     try {
       const client = await Client.findOne({ uuid });
+      if(!client) return
       if (client.phoneNumberVerification === PhoneNumberVerification.COMPLETE) {
         (client.firstName = firstName),
           (client.lastName = lastName),
           (client.profileSetup = ProfileSetup.COMPLETE);
         await client.save();
-        const accessToken = jwt.sign(
-          {
-            uuid: client.uuid,
-          },
-          process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: "1hr" }
-        );
-
         res.status(200).json({
           uuid: client.uuid,
           firstName: client.firstName,
@@ -123,7 +126,9 @@ class ClientsController {
         res.status(405).json();
       }
     } catch (error) {
-      next(new Error(error));
+      if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -134,7 +139,9 @@ class ClientsController {
       // redisClient.setEx(phoneNumber, 30, otp);
       res.json({ message: "success" });
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 }

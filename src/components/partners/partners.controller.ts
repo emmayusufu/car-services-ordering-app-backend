@@ -8,7 +8,7 @@ import {
 import { generateOTP } from "../../utils/helpers";
 import { Individual } from "../../database/entities/individuals.entity";
 import { Company } from "../../database/entities/companies.entity";
-import RedisClient from "../../utils/redis-client";
+import RedisClient from "../../utils/redis-manager";
 import AfricasTalkingClient from "../../utils/africastalking-client";
 
 class PartnersController {
@@ -22,7 +22,9 @@ class PartnersController {
       });
       res.status(200).json(partners);
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -34,7 +36,9 @@ class PartnersController {
       const partner = await Partner.findOne({ uuid });
       res.status(200).json({ partner });
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -61,7 +65,9 @@ class PartnersController {
         res.status(201).json({ message: "new_partner_created" });
       }
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -70,7 +76,7 @@ class PartnersController {
       otp: string;
       phoneNumber: string;
     };
-    console.log(otp,phoneNumber)
+    console.log(otp, phoneNumber)
     try {
       const value = await this._redisClient.getValue(phoneNumber);
       if (value) {
@@ -81,21 +87,23 @@ class PartnersController {
             },
             relations: ["individualDetails", "companyDetails"],
           });
-          switch (partner.profileSetup) {
-            case ProfileSetup.PENDING:
-              res.json({
-                message: "profile_setup_pending",
-                uuid: partner.uuid,
-              });
-              break;
-            case ProfileSetup.COMPLETE:
-              res.json({
-                message: "profile_setup_complete",
-                user: partner,
-              });
-              break;
-            default:
-              break;
+          if (partner) {
+            switch (partner.profileSetup) {
+              case ProfileSetup.PENDING:
+                res.json({
+                  message: "profile_setup_pending",
+                  uuid: partner.uuid,
+                });
+                break;
+              case ProfileSetup.COMPLETE:
+                res.json({
+                  message: "profile_setup_complete",
+                  user: partner,
+                });
+                break;
+              default:
+                break;
+            }
           }
         } else {
           res.json({ message: "incorrect otp" });
@@ -104,7 +112,9 @@ class PartnersController {
         res.json({ message: "otp not found" });
       }
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -120,14 +130,18 @@ class PartnersController {
       await individual.save();
 
       const partner = await Partner.findOne({ where: { uuid: uuid } });
-      partner.individualDetails = individual;
-      partner.profileSetup = ProfileSetup.COMPLETE;
-      partner.accountType = AccountType.INDIVIDUAL;
-      await partner.save();
+      if (partner) {
+        partner.individualDetails = individual;
+        partner.profileSetup = ProfileSetup.COMPLETE;
+        partner.accountType = AccountType.INDIVIDUAL;
+        await partner.save();
 
-      res.status(201).json({ message: "success" });
+        res.status(201).json({ message: "success" });
+      }
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -136,20 +150,24 @@ class PartnersController {
     const { companyName } = req.body as {
       companyName: string;
     };
-    console.log(uuid,companyName)
+    console.log(uuid, companyName)
     try {
       const company = new Company();
       (company.companyName = companyName), await company.save();
 
       const partner = await Partner.findOne({ uuid });
-      partner.companyDetails = company;
-      partner.profileSetup = ProfileSetup.COMPLETE;
-      partner.accountType = AccountType.COMPANY;
-      await partner.save();
+      if (partner) {
+        partner.companyDetails = company;
+        partner.profileSetup = ProfileSetup.COMPLETE;
+        partner.accountType = AccountType.COMPANY;
+        await partner.save();
 
-      res.status(201).json({ message: "succcess" });
+        res.status(201).json({ message: "succcess" });
+      }
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 
@@ -167,13 +185,17 @@ class PartnersController {
         where: { uuid: uuid },
         relations: ["individualDetails", "companyDetails"],
       });
-      (partner.carWash = carWash || false),
-        (partner.carServicing = carServicing || false);
-      partner.emergencyRescue = emergencyRescue || false;
-      await partner.save();
-      res.json({ message: "success", user:partner });
+      if (partner) {
+        (partner.carWash = carWash || false),
+          (partner.carServicing = carServicing || false);
+        partner.emergencyRescue = emergencyRescue || false;
+        await partner.save();
+        res.json({ message: "success", user: partner });
+      }
     } catch (error) {
-      next(new Error(error));
+       if (error instanceof Error){
+        next(new Error(error.message));
+      }
     }
   };
 }

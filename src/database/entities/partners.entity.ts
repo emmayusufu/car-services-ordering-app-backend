@@ -16,32 +16,32 @@ export class Partner extends Model {
     unique: true,
     nullable: true,
   })
-  phoneNumber: string;
+  phoneNumber: string | undefined ;
 
   @Column({
     nullable: true,
     default:false
   })
-  emergencyRescue: boolean;
+  emergencyRescue: boolean | undefined ;
 
   @Column({
     nullable: true,
     default:false
   })
-  carWash: boolean;
+  carWash: boolean | undefined ;
 
   @Column({
     nullable: true,
     default:false
   })
-  carServicing: boolean;
+  carServicing: boolean | undefined ;
  
   @Column({
     unique: false,
     nullable: true,
     enum: AccountType,
   })
-  accountType: string;
+  accountType: string | undefined ;
   
   @Column({
     unique: false,
@@ -49,23 +49,23 @@ export class Partner extends Model {
     enum: ProfileSetup,
     default: ProfileSetup.PENDING,
   })
-  profileSetup: string;
+  profileSetup: string | undefined ;
 
   @Column({
     unique: false,
     nullable: true,
     enum: AccountStatus,
   })
-  accountStatus: string;
+  accountStatus: string | undefined ;
 
   @OneToOne(() => Individual, (individual) => individual.partner)
   @JoinColumn()
-  individualDetails: Individual;
+  individualDetails: Individual | undefined ;
 
   @OneToOne(() => Company, (company) => company.partner)
   @JoinColumn()
-  companyDetails: Company;
+  companyDetails: Company | undefined ;
 
   @OneToMany(() => Order, (order) => order.partner)
-  orders: Order[];
+  orders: Order[] | undefined ;
 }

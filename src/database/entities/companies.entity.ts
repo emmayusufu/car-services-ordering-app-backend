@@ -12,9 +12,9 @@ export class Company extends Model {
     nullable: false,
     unique: false,
   })
-  companyName: string;
+  companyName!: string ;
 
   @OneToOne(() => Partner, (partner) => partner.companyDetails)
-  partner: Partner;
+  partner: Partner | undefined ;
 
 }

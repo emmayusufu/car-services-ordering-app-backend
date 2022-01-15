@@ -1,16 +1,16 @@
 import { createClient } from "redis";
 import { logger } from "./logger";
 
-class RedisClient {
-  private static instance :RedisClient
-  private client = createClient();
+class Redis {
+  private static instance :Redis
+  client = createClient();
   // { url: "redis://localhost:6379" }
 
   private constructor() {
     this.initializeRedisClient()
   }
 
-  initializeRedisClient = async () => {
+  private initializeRedisClient = async () => {
     try {
       this.client.on("error", (err) => console.log("Redis Client Error", err));
       await this.client.connect();
@@ -23,10 +23,9 @@ class RedisClient {
     if(this.instance){
       return this.instance
     }
-    this.instance = new RedisClient()
+    this.instance = new Redis()
     return this.instance
   }
-
 
   setValue = async (key: string, value: string, exp: number) => {
     await this.client.setEx(key, exp, value);
@@ -38,4 +37,4 @@ class RedisClient {
   };
 }
 
-export default RedisClient;
+export default Redis;

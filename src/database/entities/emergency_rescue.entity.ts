@@ -7,11 +7,11 @@ export class EmergencyRescue extends Model {
     unique: false,
     default: false,
   })
-  carTowing: boolean;
+  carTowing: boolean | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  jumpStarting: boolean;
+  jumpStarting: boolean | undefined ;
 }

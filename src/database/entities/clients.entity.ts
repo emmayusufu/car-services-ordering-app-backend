@@ -10,39 +10,39 @@ import { Order } from "./orders.entity";
 @Entity({ name: "clients" })
 export class Client extends Model {
   @Column({
-    unique:false,
-    nullable:true,
+    unique: false,
+    nullable: true,
   })
-  firstName: string;
+  firstName: string | undefined;
 
   @Column({
-    unique:false,
-    nullable:true,
+    unique: false,
+    nullable: true,
   })
-  lastName: string;
+  lastName: string | undefined;
 
   @Column({
-    unique:true,
-    nullable:true,
+    unique: true,
+    nullable: true,
   })
-  phoneNumber: string;
-  
-  @Column({
-    unique:false,
-    nullable:true,
-    enum:PhoneNumberVerification,
-    default:PhoneNumberVerification.PENDING
-  })
-  phoneNumberVerification: string;
+  phoneNumber: string | undefined;
 
   @Column({
-    unique:false,
-    nullable:true,
-    enum:ProfileSetup,
-    default:ProfileSetup.PENDING
+    unique: false,
+    nullable: true,
+    enum: PhoneNumberVerification,
+    default: PhoneNumberVerification.PENDING
   })
-  profileSetup: string;
+  phoneNumberVerification: string | undefined;
 
-  @OneToMany(()=>Order,order=>order.client)
-  orders:Order[]
+  @Column({
+    unique: false,
+    nullable: true,
+    enum: ProfileSetup,
+    default: ProfileSetup.PENDING
+  })
+  profileSetup: string | undefined;
+
+  @OneToMany(() => Order, order => order.client)
+  orders: Order[] | undefined
 }

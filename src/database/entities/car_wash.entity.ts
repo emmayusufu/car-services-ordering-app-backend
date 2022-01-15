@@ -7,11 +7,11 @@ export class CarWash extends Model {
     unique: false,
     default: false,
   })
-  inCall: boolean;
+  inCall: boolean | undefined ;
 
   @Column({
     unique: false,
     default: false,
   })
-  outCall: boolean;
+  outCall: boolean | undefined ;
 }
