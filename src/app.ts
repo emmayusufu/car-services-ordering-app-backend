@@ -51,41 +51,36 @@ class App {
       this.io.on("connection", (socket: Socket) => {
         const auth = socket.handshake.auth as { uuid: string, role: string }
         const socketId: string = socket.id
-        // console.log(colors.green(`A ${auth.role} with uuid : ${auth.uuid} and socket id ${socketId} has connected`))
 
-        //   this.redisClient.json.set(`${role}:${uuid}`, '.', {
-        //     socketId
-        //   }).then((value: string) => {
-        //     if (value === "OK") {
-        //       console.log(colors.green(`A user with uuid : ${uuid} and socket id ${socketId} has connected`))
-        //     } else {
-        //       console.log(colors.red("Failed to set user hash"))
-        //     }
-        //   }).catch((error)=>{
-        //     console.log(colors.red(`location update error ${error}`))
-        //   })
+        const userData = JSON.stringify({
+          socketId
+        })
 
-        // socket.on("locationUpdates", (data: any) => {
-        //   const { latitude, longitude, uuid }: { latitude: string, longitude: string, uuid: string } = JSON.parse(data)
-        //   this.redisClient.geoAdd("partnerLoctions", { latitude: latitude, longitude: longitude, member: uuid }).then((value: number) => {
-        //     if (value) {
-        //       console.log("position update success")
-        //     } else {
-        //       console.log("position update failed")
-        //     }
-        //   }).catch((error)=>{
-        //     console.log(colors.red(`location update error ${error}`))
-        //   })
-        // })
-        // socket.on("disconnect", () => {
-        //   this.redisClient.del(uuid).then((value: number) => {
-        //     if (value) {
-        //       console.log(colors.red(`A user with uuid : ${uuid} and socket id : ${socketId} has disconnected`))
-        //     } else {
-        //       console.log("Failed to remove disconnected user")
-        //     }
-        //   })
-        // })
+        this.redisClient.set(`${auth.role}:${auth.uuid}`,userData).then((response:string)=>{
+          if(response === "OK"){
+            console.log(colors.green(`A ${colors.underline(auth.role)} with uuid : ${colors.underline(auth.uuid)} and socket id ${colors.underline(socketId)} has connected`))
+          }
+        }).catch((error) => {
+          console.log(colors.red(`Something went wrong : ${error}`))
+        })
+
+        socket.on("disconnect", () => {
+          this.redisClient.del(`${auth.role}:${auth.uuid}`).then((value: number) => {
+            if (value) {
+              console.log(colors.red(`A user with uuid : ${colors.underline(auth.uuid)} and socket id : ${colors.underline(socketId)} has disconnected`))
+            } else {
+              console.log("Failed to remove disconnected user")
+            }
+          })
+        })
+        socket.on("locationUpdates", (data: any) => {
+          const { latitude, longitude, uuid }: { latitude: string, longitude: string, uuid: string } = JSON.parse(data)
+          this.redisClient.geoAdd("partnerLoctions", { latitude: latitude, longitude: longitude, member: uuid }).then((value: number) => {
+            console.log(colors.blue("location updated"))
+          }).catch((error)=>{
+            console.log(colors.red(`location update error ${error}`))
+          })
+        })
 
       })
     } else {
