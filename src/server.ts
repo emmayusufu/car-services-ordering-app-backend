@@ -1,22 +1,18 @@
-import "reflect-metadata";
-import dotenv from "dotenv";
-import App from "./app";
+import 'reflect-metadata';
+import dotenv from 'dotenv';
+import { server } from './app';
+import { createConnection } from 'typeorm';
+import { logger } from './utils/logger';
 dotenv.config();
 
-import ClientsRouter from "./components/clients/clients.router";
-import PartnersRouter from "./components/partners/partners.router";
-import EmergencyRescueRouter from "./components/emergency_rescue/emergency_rescue.router";
-import CarServicingRouter from "./components/car_servicing/car_servicing.router";
-import CarWashRouter from "./components/car_wash/car_wash.router";
-import OrdersRouter from "./components/orders/orders.router";
+const port = process.env.PORT || 5000;
+const env = process.env.NODE_ENV || 'development';
 
-const app = new App([
-  new ClientsRouter(),
-  new PartnersRouter(),
-  new EmergencyRescueRouter(),
-  new CarServicingRouter(),
-  new CarWashRouter(),
-  new OrdersRouter(),
-]);
- 
-app.listen();
+createConnection().then(() => {
+    server.listen(port, () => {
+        logger.info(`=================================`);
+        logger.info(`======= ENV: ${env} =======`);
+        logger.info(`App listening on the port http://localhost:${port}`);
+        logger.info(`=================================`);
+    });
+});

@@ -1,50 +1,78 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
+import { io } from '../../app';
+import RedisManager from '../../utils/redis-manager';
 
 class OrdersController {
-  getAll: RequestHandler = async (req, res, next) => {
-    const {} = req.body;
+    private _redisClient = RedisManager.getInstance().client;
 
-    try {
-    } catch (error) {
-      next(new Error(error));
-    }
-  };
+    getAll: RequestHandler = async (req, res, next) => {
+        const {} = req.body;
 
-  getOne: RequestHandler = async (req, res, next) => {
-    const {} = req.body;
+        try {
+        } catch (error) {
+            next(new Error(error));
+        }
+    };
 
-    try {
-    } catch (error) {
-      next(new Error(error));
-    }
-  };
+    getOne: RequestHandler = async (req, res, next) => {
+        const {} = req.body;
 
-  orderCarWash: RequestHandler = async (req, res, next) => {
-    const {} = req.body;
+        try {
+        } catch (error) {
+            next(new Error(error));
+        }
+    };
 
-    try {
-    } catch (error) {
-      next(new Error(error));
-    }
-  };
+    orderCarWash: RequestHandler = async (req, res, next) => {
+        const { locationCoordinates } = req.body as {
+            firstName: string;
+            lastName: string;
+            uuid: string;
+            phoneNumber: string;
+            locationCoordinates: {
+                latitude: string;
+                longitude: string;
+            };
+        };
 
-  orderCarServicing: RequestHandler = async (req, res, next) => {
-    const {} = req.body;
+        const nearByPartners = await this._redisClient.geoSearch(
+            'partnerLocations',
+            {
+                latitude: locationCoordinates.latitude,
+                longitude: locationCoordinates.longitude,
+            },
+            { radius: 5, unit: 'km' },
+            { SORT: 'ASC', COUNT: 10 }
+        );
 
-    try {
-    } catch (error) {
-      next(new Error(error));
-    }
-  };
+        console.log(nearByPartners);
 
-  orderEmergencyRescue: RequestHandler = async (req, res, next) => {
-    const {} = req.body;
+        try {
+            res.json({ message: 'success' });
+        } catch (error) {
+            if (error instanceof Error) {
+                next(new Error(error.message));
+            }
+        }
+    };
 
-    try {
-    } catch (error) {
-      next(new Error(error));
-    }
-  };
+    orderCarServicing: RequestHandler = async (req, res, next) => {
+        const {} = req.body;
+
+        try {
+        } catch (error) {
+            next(new Error(error));
+        }
+    };
+
+    orderEmergencyRescue: RequestHandler = async (req, res, next) => {
+        const {} = req.body;
+
+        try {
+        } catch (error) {
+            next(new Error(error));
+        }
+    };
 }
 
 export default OrdersController;

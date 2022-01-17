@@ -1,117 +1,124 @@
-import express, { json, NextFunction, Request, Response } from "express";
-import http, { Server } from "http";
-import { AppRouter } from "./interfaces/interfaces";
-import { createConnection } from "typeorm";
-import morgan from "morgan";
-import { logger } from "./utils/logger";
-import SocketIO from "./utils/socket-io";
-import { Socket } from "socket.io";
-import colors from "colors/safe"
-import Redis from "./utils/redis-manager";
+import express, { NextFunction, Request, Response } from 'express';
+import http, { Server } from 'http';
+import morgan from 'morgan';
+import { logger } from './utils/logger';
+import SocketIO from './utils/socket-io';
+import { Socket } from 'socket.io';
+import colors from 'colors/safe';
+import Redis from './utils/redis-manager';
+import ClientsRouter from './components/clients/clients.router';
+import PartnersRouter from './components/partners/partners.router';
+import EmergencyRescueRouter from './components/emergency_rescue/emergency_rescue.router';
+import CarServicingRouter from './components/car_servicing/car_servicing.router';
+import CarWashRouter from './components/car_wash/car_wash.router';
+import OrdersRouter from './components/orders/orders.router';
 
-interface RedisPartner {
-  socketId: string
-}
+const app = express();
+const server: Server = http.createServer(app);
+const io = new SocketIO(server).getIO();
+const redisClient = Redis.getInstance().client;
 
+[
+    new ClientsRouter(),
+    new PartnersRouter(),
+    new EmergencyRescueRouter(),
+    new CarServicingRouter(),
+    new CarWashRouter(),
+    new OrdersRouter(),
+].map(({ path, router }) => {
+    return app.use(path, router);
+});
 
-class App {
-  private app = express();
-  private server: Server = http.createServer(this.app);
-  private port = process.env.PORT || 5000;
-  private env = process.env.NODE_ENV || "development";
-  private io = new SocketIO(this.server).getIO()
-  private redisClient = Redis.getInstance().client;
+io.on('connection', (socket: Socket) => {
+    const auth = socket.handshake.auth as { uuid: string; role: string };
+    const socketId: string = socket.id;
 
-  constructor(routes: AppRouter[]) {
-    this.initializeMiddleware();
-    this.initializeRoutes(routes);
-    this.initializeSocketIO()
-  }
-
-  listen = () => {
-    createConnection().then(() => {
-      this.server.listen(this.port, () => {
-        logger.info(`=================================`);
-        logger.info(`======= ENV: ${this.env} =======`);
-        logger.info(`App listening on the port http://localhost:${this.port}`);
-        logger.info(`=================================`);
-      });
+    const userData = JSON.stringify({
+        socketId,
     });
-  };
 
-  initializeRoutes = (routes: AppRouter[]) => {
-    routes.map(({ path, router }) => {
-      return this.app.use(path, router);
-    });
-  };
-
-  initializeSocketIO = () => {
-
-    if (this.io) {
-      this.io.on("connection", (socket: Socket) => {
-        const auth = socket.handshake.auth as { uuid: string, role: string }
-        const socketId: string = socket.id
-
-        const userData = JSON.stringify({
-          socketId
-        })
-
-        this.redisClient.set(`${auth.role}:${auth.uuid}`,userData).then((response:string)=>{
-          if(response === "OK"){
-            console.log(colors.green(`A ${colors.underline(auth.role)} with uuid : ${colors.underline(auth.uuid)} and socket id ${colors.underline(socketId)} has connected`))
-          }
-        }).catch((error) => {
-          console.log(colors.red(`Something went wrong : ${error}`))
-        })
-
-        socket.on("disconnect", () => {
-          this.redisClient.del(`${auth.role}:${auth.uuid}`).then((value: number) => {
-            if (value) {
-              console.log(colors.red(`A user with uuid : ${colors.underline(auth.uuid)} and socket id : ${colors.underline(socketId)} has disconnected`))
-            } else {
-              console.log("Failed to remove disconnected user")
+    // store user details in redis cache
+    redisClient
+        .set(`${auth.role}:${auth.uuid}`, userData)
+        .then((response: string) => {
+            if (response === 'OK') {
+                console.log(
+                    colors.green(
+                        `A ${colors.underline(
+                            auth.role
+                        )} with uuid : ${colors.underline(
+                            auth.uuid
+                        )} and socket id ${colors.underline(
+                            socketId
+                        )} has connected`
+                    )
+                );
             }
-          })
         })
-        socket.on("locationUpdates", (data: any) => {
-          const { latitude, longitude, uuid }: { latitude: string, longitude: string, uuid: string } = JSON.parse(data)
-          this.redisClient.geoAdd("partnerLoctions", { latitude: latitude, longitude: longitude, member: uuid }).then((value: number) => {
-            console.log(colors.blue("location updated"))
-          }).catch((error)=>{
-            console.log(colors.red(`location update error ${error}`))
-          })
-        })
+        .catch((error) => {
+            console.log(colors.red(`Something went wrong : ${error}`));
+        });
 
-      })
-    } else {
-      console.log(colors.red("IO object not initialised"))
+    // if user role is partner start storing details in redis cache
+    if (auth.role === 'partner') {
+        socket.on('locationUpdates', (data: any) => {
+            const {
+                latitude,
+                longitude,
+                uuid,
+            }: { latitude: string; longitude: string; uuid: string } =
+                JSON.parse(data);
+            redisClient
+                .geoAdd('partnerLoctions', {
+                    latitude: latitude,
+                    longitude: longitude,
+                    member: uuid,
+                })
+                .then((value: number) => {
+                    console.log(colors.blue('location updated'));
+                })
+                .catch((error) => {
+                    console.log(colors.red(`location update error ${error}`));
+                });
+        });
     }
 
-  }
+    socket.on('disconnect', () => {
+        // start by deleting user details
+        redisClient.del(`${auth.role}:${auth.uuid}`).then((value: number) => {
+            if (value) {
+                console.log(
+                    colors.red(
+                        `A user with uuid : ${colors.underline(
+                            auth.uuid
+                        )} and socket id : ${colors.underline(
+                            socketId
+                        )} has disconnected`
+                    )
+                );
+            } else {
+                console.log('Failed to remove disconnected user');
+            }
+        });
 
-  initializeMiddleware = () => {
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(morgan("dev"));
-    this.app.get("/", (req, res) => {
-      res.json({ message: `Server is up and running on port : ${this.port}` })
-    })
-  };
+        // if user role is partner, remove from geoindex
+        redisClient.zRem('partnerLocations', `${auth.role}:${auth.uuid}`);
+    });
+});
 
-  initializeErrorHandling() {
-    this.app.use(
-      (error: Error, req: Request, res: Response, _next: NextFunction) => {
-        //   const status = error.status || 500;
-        const message = error.message || "Something went wrong";
-        logger.error(
-          `[${req.method}] ${req.path} >> StatusCode:: {status}, Message:: ${message}`
-        );
-        res.status(500).json({ message });
-      }
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.get('/', (req, res) => {
+    res.json({ message: `Server is up and running` });
+});
+
+app.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
+    const message = error.message || 'Something went wrong';
+    logger.error(
+        `[${req.method}] ${req.path} >> StatusCode:: {status}, Message:: ${message}`
     );
-  }
-}
+    res.status(500).json({ message });
+});
 
-export default App;
-
-
+export { io, server };

@@ -15,6 +15,7 @@
    "dependencies": {
       "@googlemaps/google-maps-services-js": "^3.3.5",
       "africastalking-ts": "^0.0.3",
+      "cli-color": "^2.0.1",
       "colors": "^1.4.0",
       "dotenv": "^8.6.0",
       "express": "^4.17.1",
