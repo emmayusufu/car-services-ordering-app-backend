@@ -12,6 +12,7 @@ import EmergencyRescueRouter from './components/emergency_rescue/emergency_rescu
 import CarServicingRouter from './components/car_servicing/car_servicing.router';
 import CarWashRouter from './components/car_wash/car_wash.router';
 import OrdersRouter from './components/orders/orders.router';
+import clc from 'cli-color';
 
 const app = express();
 const server: Server = http.createServer(app);
@@ -43,14 +44,10 @@ io.on('connection', (socket: Socket) => {
         .then((response: string) => {
             if (response === 'OK') {
                 console.log(
-                    colors.green(
-                        `A ${colors.underline(
+                    clc.cyanBright(
+                        `${new Date().toLocaleString().replace(',', '')} : A ${
                             auth.role
-                        )} with uuid : ${colors.underline(
-                            auth.uuid
-                        )} and socket id ${colors.underline(
-                            socketId
-                        )} has connected`
+                        } has connected to the sockets`
                     )
                 );
             }
@@ -74,9 +71,6 @@ io.on('connection', (socket: Socket) => {
                     longitude: longitude,
                     member: uuid,
                 })
-                .then((value: number) => {
-                    console.log(colors.blue('location updated'));
-                })
                 .catch((error) => {
                     console.log(colors.red(`location update error ${error}`));
                 });
@@ -85,21 +79,23 @@ io.on('connection', (socket: Socket) => {
 
     socket.on('disconnect', () => {
         // start by deleting user details
-        redisClient.del(`${auth.role}:${auth.uuid}`).then((value: number) => {
-            if (value) {
-                console.log(
-                    colors.red(
-                        `A user with uuid : ${colors.underline(
-                            auth.uuid
-                        )} and socket id : ${colors.underline(
-                            socketId
-                        )} has disconnected`
-                    )
-                );
-            } else {
-                console.log('Failed to remove disconnected user');
-            }
-        });
+        redisClient.json
+            .del(`${auth.role}:${auth.uuid}`)
+            .then((value: number) => {
+                if (value) {
+                    console.log(
+                        colors.red(
+                            `A user with uuid : ${colors.underline(
+                                auth.uuid
+                            )} and socket id : ${colors.underline(
+                                socketId
+                            )} has disconnected`
+                        )
+                    );
+                } else {
+                    console.log('Failed to remove disconnected user');
+                }
+            });
 
         // if user role is partner, remove from geoindex
         redisClient.zRem('partnerLocations', `${auth.role}:${auth.uuid}`);

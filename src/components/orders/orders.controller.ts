@@ -35,17 +35,23 @@ class OrdersController {
             };
         };
 
-        const nearByPartners = await this._redisClient.geoSearch(
-            'partnerLocations',
-            {
-                latitude: locationCoordinates.latitude,
-                longitude: locationCoordinates.longitude,
-            },
-            { radius: 5, unit: 'km' },
-            { SORT: 'ASC', COUNT: 10 }
-        );
+        // const nearByPartners = await this._redisClient.geoSearch(
+        //     'partnerLocations',
+        //     {
+        //         longitude: locationCoordinates.longitude,
+        //         latitude: locationCoordinates.latitude,
+        //     },
+        //     {
+        //         radius: 5,
+        //         unit: 'km',
+        //     },
+        //     {
+        //         SORT: 'ASC',
+        //         COUNT: 10,
+        //     }
+        // );
 
-        console.log(nearByPartners);
+        // console.log(nearByPartners);
 
         try {
             res.json({ message: 'success' });
