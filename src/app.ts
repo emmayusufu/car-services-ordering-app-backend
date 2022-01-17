@@ -43,11 +43,12 @@ io.on('connection', (socket: Socket) => {
         .set(`${auth.role}:${auth.uuid}`, userData)
         .then((response: string) => {
             if (response === 'OK') {
+                console.log(`\n`);
                 console.log(
                     clc.cyanBright(
                         `${new Date().toLocaleString().replace(',', '')} : A ${
                             auth.role
-                        } has connected to the sockets`
+                        } has connected`
                     )
                 );
             }
@@ -72,30 +73,32 @@ io.on('connection', (socket: Socket) => {
                     member: uuid,
                 })
                 .catch((error) => {
-                    console.log(colors.red(`location update error ${error}`));
+                    console.log(clc.red(`location update error ${error}`));
                 });
         });
     }
 
+    socket.on('orderResponse', (data) => {
+        console.log(`\n`);
+        console.log(clc.yellow(`Order response data is ${data}`));
+    });
+
     socket.on('disconnect', () => {
         // start by deleting user details
-        redisClient.json
-            .del(`${auth.role}:${auth.uuid}`)
-            .then((value: number) => {
-                if (value) {
-                    console.log(
-                        colors.red(
-                            `A user with uuid : ${colors.underline(
-                                auth.uuid
-                            )} and socket id : ${colors.underline(
-                                socketId
-                            )} has disconnected`
-                        )
-                    );
-                } else {
-                    console.log('Failed to remove disconnected user');
-                }
-            });
+        redisClient.del(`${auth.role}:${auth.uuid}`).then((value: number) => {
+            if (value) {
+                console.log(`\n`);
+                console.log(
+                    clc.red(
+                        `${new Date().toLocaleString().replace(',', '')} : A ${
+                            auth.role
+                        } has disconneted`
+                    )
+                );
+            } else {
+                console.log('Failed to remove disconnected user');
+            }
+        });
 
         // if user role is partner, remove from geoindex
         redisClient.zRem('partnerLocations', `${auth.role}:${auth.uuid}`);

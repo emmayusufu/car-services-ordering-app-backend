@@ -1,14 +1,19 @@
 import { RequestHandler } from 'express';
 import { io } from '../../app';
 import RedisManager from '../../utils/redis-manager';
+import { Order } from '../../database/entities/orders.entity';
+import { Partner } from '../../database/entities/partners.entity';
+import { Client } from '../../database/entities/clients.entity';
+import { CarWashOrderRequest } from '../../interfaces/interfaces';
 
 class OrdersController {
     private _redisClient = RedisManager.getInstance().client;
 
     getAll: RequestHandler = async (req, res, next) => {
-        const {} = req.body;
+        // const {} = req.body;
 
         try {
+            res.json({ message: 'success' });
         } catch (error) {
             next(new Error(error));
         }
@@ -24,16 +29,13 @@ class OrdersController {
     };
 
     orderCarWash: RequestHandler = async (req, res, next) => {
-        const { locationCoordinates } = req.body as {
-            firstName: string;
-            lastName: string;
-            uuid: string;
-            phoneNumber: string;
-            locationCoordinates: {
-                latitude: string;
-                longitude: string;
-            };
-        };
+        // const { locationCoordinates, uuid } = req.body as CarWashOrderRequest;
+
+        // const client = await Client.findOne({ where: { uuid: uuid } });
+
+        const partnerDetails = await this._redisClient.get(`partner:12345`);
+        const { socketId } = JSON.parse(partnerDetails);
+        io.to(socketId).emit('orderRequest', 'You have a new order');
 
         // const nearByPartners = await this._redisClient.geoSearch(
         //     'partnerLocations',

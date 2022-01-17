@@ -5,4 +5,13 @@ export interface AppRouter {
     router: Router;
 }
 
-export interface CarWashOrder {}
+export interface CarWashOrderRequest {
+    firstName: string;
+    lastName: string;
+    uuid: string;
+    phoneNumber: string;
+    locationCoordinates: {
+        latitude: string;
+        longitude: string;
+    };
+}

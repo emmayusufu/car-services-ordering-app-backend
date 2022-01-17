@@ -1,71 +1,71 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import {
-  AccountType,
-  AccountStatus,
-  PhoneNumberVerification,
-  ProfileSetup,
-} from "../../enums/enums";
-import { Company } from "./companies.entity";
-import { Individual } from "./individuals.entity";
-import { Model } from "./model";
-import { Order } from "./orders.entity";
- 
-@Entity({ name: "partners" })
+    AccountType,
+    AccountStatus,
+    PhoneNumberVerification,
+    ProfileSetup,
+} from '../../enums/enums';
+import { Company } from './companies.entity';
+import { Individual } from './individuals.entity';
+import { Model } from './model';
+import { Order } from './orders.entity';
+
+@Entity({ name: 'partners' })
 export class Partner extends Model {
-  @Column({
-    unique: true,
-    nullable: true,
-  })
-  phoneNumber: string | undefined ;
+    @Column({
+        unique: true,
+        nullable: true,
+    })
+    phoneNumber: string | null;
 
-  @Column({
-    nullable: true,
-    default:false
-  })
-  emergencyRescue: boolean | undefined ;
+    @Column({
+        nullable: false,
+        default: false,
+    })
+    emergencyRescue: boolean;
 
-  @Column({
-    nullable: true,
-    default:false
-  })
-  carWash: boolean | undefined ;
+    @Column({
+        nullable: false,
+        default: false,
+    })
+    carWash: boolean;
 
-  @Column({
-    nullable: true,
-    default:false
-  })
-  carServicing: boolean | undefined ;
- 
-  @Column({
-    unique: false,
-    nullable: true,
-    enum: AccountType,
-  })
-  accountType: string | undefined ;
-  
-  @Column({
-    unique: false,
-    nullable: true,
-    enum: ProfileSetup,
-    default: ProfileSetup.PENDING,
-  })
-  profileSetup: string | undefined ;
+    @Column({
+        nullable: false,
+        default: false,
+    })
+    carServicing: boolean;
 
-  @Column({
-    unique: false,
-    nullable: true,
-    enum: AccountStatus,
-  })
-  accountStatus: string | undefined ;
+    @Column({
+        unique: false,
+        nullable: true,
+        enum: AccountType,
+    })
+    accountType: string | null;
 
-  @OneToOne(() => Individual, (individual) => individual.partner)
-  @JoinColumn()
-  individualDetails: Individual | undefined ;
+    @Column({
+        unique: false,
+        nullable: true,
+        enum: ProfileSetup,
+        default: ProfileSetup.PENDING,
+    })
+    profileSetup: string | null;
 
-  @OneToOne(() => Company, (company) => company.partner)
-  @JoinColumn()
-  companyDetails: Company | undefined ;
+    @Column({
+        unique: false,
+        nullable: true,
+        enum: AccountStatus,
+    })
+    accountStatus: string | null;
 
-  @OneToMany(() => Order, (order) => order.partner)
-  orders: Order[] | undefined ;
+    @OneToOne(() => Individual, (individual) => individual.partner)
+    @JoinColumn()
+    individualDetails: Individual | null;
+
+    @OneToOne(() => Company, (company) => company.partner)
+    @JoinColumn()
+    companyDetails: Company | null;
+
+    @OneToMany(() => Order, (order) => order.partner)
+    orders: Order[] | null;
 }
