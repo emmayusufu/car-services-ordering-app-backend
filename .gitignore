@@ -5,5 +5,5 @@ build/
 tmp/
 temp/
 src/logs/
-.env
 dump.rdb
+/.env

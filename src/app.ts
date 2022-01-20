@@ -31,23 +31,23 @@ const redisClient = Redis.getInstance().client;
 });
 
 io.on('connection', (socket: Socket) => {
-    const auth = socket.handshake.auth as { uuid: string; role: string };
+    const auth = socket.handshake.auth as { uuid: string; accountType: string };
     const socketId: string = socket.id;
 
     const userData = JSON.stringify({
         socketId,
     });
 
-    // store user details in redis cache
+    // TODO: store the user details in the redis database on connection
     redisClient
-        .set(`${auth.role}:${auth.uuid}`, userData)
+        .set(`${auth.accountType}:${auth.uuid}`, userData)
         .then((response: string) => {
             if (response === 'OK') {
                 console.log(`\n`);
                 console.log(
                     clc.cyanBright(
                         `${new Date().toLocaleString().replace(',', '')} : A ${
-                            auth.role
+                            auth.accountType
                         } has connected`
                     )
                 );
@@ -57,8 +57,8 @@ io.on('connection', (socket: Socket) => {
             console.log(colors.red(`Something went wrong : ${error}`));
         });
 
-    // if user role is partner start storing details in redis cache
-    if (auth.role === 'partner') {
+    // TODO: start listening to user location updates and storing them in the redis database if user has account type of partner
+    if (auth.accountType === 'partner') {
         socket.on('locationUpdates', (data: any) => {
             const {
                 latitude,
@@ -78,30 +78,40 @@ io.on('connection', (socket: Socket) => {
         });
     }
 
+    //   TODO: start listening for order responses from respective partners
     socket.on('orderResponse', (data) => {
         console.log(`\n`);
         console.log(clc.yellow(`Order response data is ${data}`));
     });
 
+    // TODO: remove user details from the redis database on disconnection i.e., personal details and location
     socket.on('disconnect', () => {
-        // start by deleting user details
-        redisClient.del(`${auth.role}:${auth.uuid}`).then((value: number) => {
-            if (value) {
-                console.log(`\n`);
-                console.log(
-                    clc.red(
-                        `${new Date().toLocaleString().replace(',', '')} : A ${
-                            auth.role
-                        } has disconneted`
-                    )
-                );
-            } else {
-                console.log('Failed to remove disconnected user');
-            }
-        });
+        redisClient
+            .del(`${auth.accountType}:${auth.uuid}`)
+            .then((value: number) => {
+                if (value) {
+                    console.log(`\n`);
+                    console.log(
+                        clc.red(
+                            `${new Date()
+                                .toLocaleString()
+                                .replace(',', '')} : A ${
+                                auth.accountType
+                            } has disconnected`
+                        )
+                    );
+                } else {
+                    console.log('Failed to remove disconnected user');
+                }
+            });
 
-        // if user role is partner, remove from geoindex
-        redisClient.zRem('partnerLocations', `${auth.role}:${auth.uuid}`);
+        // if user role is partner, remove from geo index
+        if (auth.accountType === 'partner') {
+            redisClient.zRem(
+                'partnerLocations',
+                `${auth.accountType}:${auth.uuid}`
+            );
+        }
     });
 });
 
