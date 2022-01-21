@@ -2,10 +2,10 @@ import express, { NextFunction, Request, Response } from 'express';
 import http, { Server } from 'http';
 import morgan from 'morgan';
 import { logger } from './utils/logger';
-import SocketIO from './utils/socket-io';
+import SocketIO from './utils/socket_io';
 import { Socket } from 'socket.io';
 import colors from 'colors/safe';
-import Redis from './utils/redis-manager';
+import { redisClient } from './utils/redis_client';
 import ClientsRouter from './components/clients/clients.router';
 import PartnersRouter from './components/partners/partners.router';
 import EmergencyRescueRouter from './components/emergency_rescue/emergency_rescue.router';
@@ -17,7 +17,6 @@ import clc from 'cli-color';
 const app = express();
 const server: Server = http.createServer(app);
 const io = new SocketIO(server).getIO();
-const redisClient = Redis.getInstance().client;
 
 [
     new ClientsRouter(),

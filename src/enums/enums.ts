@@ -30,3 +30,7 @@ export enum AccountStatus {
     WAITING_APPROVAL = 'waiting_approval',
     SUSPENDED = 'suspended',
 }
+
+export enum REDIS_KEYS {
+    PARTNER_LOCATIONS = 'partnerLocations',
+}

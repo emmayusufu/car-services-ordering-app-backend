@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { io } from '../../app';
-import RedisManager from '../../utils/redis-manager';
+import { redisClient } from '../../utils/redis_client';
 import { Order } from '../../database/entities/orders.entity';
 import { Partner } from '../../database/entities/partners.entity';
 import { Client } from '../../database/entities/clients.entity';
@@ -8,8 +8,6 @@ import { CarWashOrderRequest } from '../../interfaces/interfaces';
 import { OrderType } from '../../enums/enums';
 
 class OrdersController {
-    private _redisClient = RedisManager.getInstance().client;
-
     getAll: RequestHandler = async (req, res, next) => {
         // const {} = req.body;
 
@@ -41,7 +39,7 @@ class OrdersController {
 
             await order.save();
 
-            const partnerDetails = await this._redisClient.get(`partner:12345`);
+            const partnerDetails = await redisClient.get(`partner:12345`);
             const { socketId } = JSON.parse(partnerDetails);
 
             // const nearByPartners = await this._redisClient.commandsExecutor(

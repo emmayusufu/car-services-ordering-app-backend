@@ -8,11 +8,10 @@ dotenv.config();
 const port = process.env.PORT || 5000;
 const env = process.env.NODE_ENV || 'development';
 
-createConnection().then(() => {
-    server.listen(port, () => {
-        logger.info(`=================================`);
-        logger.info(`======= ENV: ${env} =======`);
-        logger.info(`App listening on the port http://localhost:${port}`);
-        logger.info(`=================================`);
-    });
+await createConnection();
+server.listen(port, () => {
+    logger.info(`=================================`);
+    logger.info(`======= ENV: ${env} =======`);
+    logger.info(`App listening on the port http://localhost:${port}`);
+    logger.info(`=================================`);
 });
