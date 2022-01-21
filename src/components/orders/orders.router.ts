@@ -12,17 +12,15 @@ class OrdersRouter implements AppRouter {
     }
 
     initializeRoutes = () => {
-        this.router.get('/', this.controller.getAll);
-        this.router.get('/:uuid', this.controller.getOne);
-        this.router.post('/order-car-wash', this.controller.orderCarWash);
-        this.router.post(
-            '/order-car-servicing',
-            this.controller.orderCarServicing
-        );
-        this.router.post(
-            '/order-emergency-rescue',
-            this.controller.orderEmergencyRescue
-        );
+        this.router
+            .get('/', this.controller.getAll)
+            .get('/:uuid', this.controller.getOne)
+            .post('/order-car-wash', this.controller.orderCarWash)
+            .post('/order-car-servicing', this.controller.orderCarServicing)
+            .post(
+                '/order-emergency-rescue',
+                this.controller.orderEmergencyRescue
+            );
     };
 }
 

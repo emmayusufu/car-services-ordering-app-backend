@@ -30,7 +30,7 @@ class OrdersController {
     };
 
     orderCarWash: RequestHandler = async (req, res, next) => {
-        const { uuid } = req.body as CarWashOrderRequest;
+        const { uuid, locationCoordinates } = req.body as CarWashOrderRequest;
 
         try {
             const client = await Client.findOne({ where: { uuid: uuid } });
@@ -43,13 +43,22 @@ class OrdersController {
 
             const partnerDetails = await this._redisClient.get(`partner:12345`);
             const { socketId } = JSON.parse(partnerDetails);
-            io.to(socketId).emit('orderRequest', {
-                orderUuid: order.uuid,
-                clientUuid: client.uuid,
-                orderType: 'car_wash',
-            });
 
-            // const nearByPartners = await this._redisClient.geoSearch(
+            // const nearByPartners = await this._redisClient.commandsExecutor(
+            //     {
+            //         BUFFER_MODE: true,
+            //         transformArguments: function (this: void, ...args: any[]) {
+            //             throw new Error('Function not implemented.');
+            //         },
+            //     },
+            //     ['']
+            // );
+
+            /*
+            '[string, GeoSearchFrom, GeoSearchBy, GeoSearchOptions?]'.
+            */
+
+            // const nearByPartners = await this._redisClient.geoSearch(,
             //     'partnerLocations',
             //     {
             //         longitude: locationCoordinates.longitude,
@@ -66,6 +75,12 @@ class OrdersController {
             // );
 
             // console.log(nearByPartners);
+
+            io.to(socketId).emit('orderRequest', {
+                orderUuid: order.uuid,
+                clientUuid: client.uuid,
+                orderType: 'car_wash',
+            });
 
             res.json({ message: 'success' });
         } catch (error) {

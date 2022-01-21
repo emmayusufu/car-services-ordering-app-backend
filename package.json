@@ -9,6 +9,7 @@
       "@types/morgan": "^1.9.3",
       "@types/node": "^8.0.29",
       "@types/redis": "^4.0.11",
+      "jest": "^27.4.7",
       "nodemon": "^2.0.15",
       "ts-node": "^3.3.0",
       "typescript": "^3.3.3333"
