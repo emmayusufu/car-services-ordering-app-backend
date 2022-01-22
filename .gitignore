@@ -7,3 +7,4 @@ temp/
 src/logs/
 dump.rdb
 /.env
+/dist

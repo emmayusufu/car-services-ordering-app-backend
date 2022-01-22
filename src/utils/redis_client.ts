@@ -5,8 +5,10 @@ const redisClient = createClient();
 
 redisClient.on('error', (err) => logger.error('Redis Client Error', err));
 
-await redisClient.connect();
+async () => {
+    await redisClient.connect();
 
-await redisClient.flushAll();
+    await redisClient.flushAll();
+};
 
 export { redisClient };
