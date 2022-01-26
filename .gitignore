@@ -8,3 +8,4 @@ src/logs/
 dump.rdb
 /.env
 /dist
+/postgres_data

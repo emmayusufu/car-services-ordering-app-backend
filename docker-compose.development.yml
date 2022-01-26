@@ -6,6 +6,9 @@ services:
       context: .
       args:
         - NODE_ENV=development
+    container_name: web_server
+    depends_on:
+      - postgres_database    
     volumes:
       - ./:/app
       - /app/node_modules

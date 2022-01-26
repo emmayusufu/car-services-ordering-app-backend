@@ -36,7 +36,7 @@
         "winston-daily-rotate-file": "^4.5.5"
     },
     "scripts": {
-        "dev": "nodemon -e ts,json,js,.env --exec npm start",
+        "dev": "nodemon --exec npm start",
         "start": "ts-node src/server.ts",
         "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js"
     }

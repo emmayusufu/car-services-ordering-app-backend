@@ -1,24 +1,18 @@
 {
-   "type": "postgres",
-   "host": "localhost",
-   "port": 5432,
-   "username": "postgres",
-   "password": "240063",
-   "database": "biko_mechanic",
-   "synchronize": true,
-   "logging": false,
-   "entities": [
-      "src/database/entities/**/*.ts"
-   ],
-   "migrations": [ 
-      "src/database/migration/**/*.ts"
-   ],
-   "subscribers": [
-      "src/database/subscriber/**/*.ts"
-   ],
-   "cli": {
-      "entitiesDir": "src/database/entities",
-      "migrationsDir": "src/database/migrations",
-      "subscribersDir": "src/database/subscriber"
-   }
+    "type": "postgres",
+    "host": "postgres_database",
+    "port": 5432,
+    "username": "biko",
+    "password": "240063013",
+    "database": "biko_mechanic_db",
+    "synchronize": true,
+    "logging": false,
+    "entities": ["src/database/entities/**/*.ts"],
+    "migrations": ["src/database/migration/**/*.ts"],
+    "subscribers": ["src/database/subscriber/**/*.ts"],
+    "cli": {
+        "entitiesDir": "src/database/entities",
+        "migrationsDir": "src/database/migrations",
+        "subscribersDir": "src/database/subscriber"
+    }
 }

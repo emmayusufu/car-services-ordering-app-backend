@@ -1,7 +1,18 @@
 # prettier-ignore
 version: '3.9'
 services:
-  server:
+  web_server:
     build: .
     ports:
       - "5000:5000"
+  postgres_database:
+    image: postgres
+    container_name: postgres_database
+    env_file:
+      - ./env/.env
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    ports:
+      - '5432:4321'
+volumes:
+  postgres_data:
