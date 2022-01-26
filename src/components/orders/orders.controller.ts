@@ -1,13 +1,16 @@
 import { RequestHandler } from 'express';
-import { io } from '../../app';
+import { getIO } from '../../utils/socket_io';
 import { redisClient } from '../../utils/redis_client';
 import { Order } from '../../database/entities/orders.entity';
 import { Partner } from '../../database/entities/partners.entity';
 import { Client } from '../../database/entities/clients.entity';
 import { CarWashOrderRequest } from '../../interfaces/interfaces';
 import { OrderType } from '../../enums/enums';
+import { NotificationService } from '../../utils/notification_service';
 
 class OrdersController {
+    private _notificationService = NotificationService.getInstance();
+
     getAll: RequestHandler = async (req, res, next) => {
         // const {} = req.body;
 
@@ -73,12 +76,6 @@ class OrdersController {
             // );
 
             // console.log(nearByPartners);
-
-            io.to(socketId).emit('orderRequest', {
-                orderUuid: order.uuid,
-                clientUuid: client.uuid,
-                orderType: 'car_wash',
-            });
 
             res.json({ message: 'success' });
         } catch (error) {

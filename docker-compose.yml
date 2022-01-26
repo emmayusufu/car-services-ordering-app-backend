@@ -1,0 +1,7 @@
+# prettier-ignore
+version: '3.9'
+services:
+  server:
+    build: .
+    ports:
+      - "5000:5000"

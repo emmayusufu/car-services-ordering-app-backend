@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { OrderType } from '../enums/enums';
 
 export interface AppRouter {
     path: string;
@@ -13,5 +14,21 @@ export interface CarWashOrderRequest {
     locationCoordinates: {
         latitude: string;
         longitude: string;
+    };
+}
+
+export interface OrderRequest {
+    clientDetails: {
+        uuid: string;
+        firstName: string;
+        lastName: string;
+        phoneNumber: string;
+    };
+    orderDetails: {
+        orderType: OrderType;
+        locationCoordinates: {
+            latitude: string;
+            longitude: string;
+        };
     };
 }

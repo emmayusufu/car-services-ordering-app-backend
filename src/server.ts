@@ -13,13 +13,13 @@ const server: http.Server = http.createServer(app);
 
 setIO(server);
 
-const io = getIO();
+// const io = getIO();
 
-io.on('connection', socketIOController);
+// io.on('connection', socketIOController);
 
-async () => {
-    await createConnection();
-};
+// async () => {
+//     await createConnection();
+// };
 
 server.listen(port, () => {
     logger.info(`=================================`);

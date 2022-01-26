@@ -93,7 +93,7 @@ const socketIOController = (socket: Socket) => {
                 }
             });
 
-        // if user role is partner, remove from geo index
+        // TODO: if user role is partner, remove from geo index
         if (auth.accountType === 'partner') {
             redisClient.zRem(
                 'partnerLocations',
