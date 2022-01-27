@@ -5,7 +5,11 @@ import { app } from './app';
 import { createConnection } from 'typeorm';
 import { logger } from './utils/logger';
 import { setIO, socketIOController, getIO } from './utils/socket_io';
-dotenv.config();
+import path from 'path';
+
+dotenv.config({
+    path: path.resolve(process.cwd(), 'env/.env'),
+});
 
 const port = process.env.PORT;
 const env = process.env.NODE_ENV || 'development';
@@ -13,9 +17,9 @@ const server: http.Server = http.createServer(app);
 
 setIO(server);
 
-// const io = getIO();
+const io = getIO();
 
-// io.on('connection', socketIOController);
+io.on('connection', socketIOController);
 
 async () => {
     let retries = 5;
