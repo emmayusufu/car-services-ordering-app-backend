@@ -11,14 +11,13 @@ export enum ProfileSetup {
 export enum OrderStatus {
     PENDING = 'pending',
     COMPLETE = 'complete',
-    CANCELLED = 'cancelled',
     ONGOING = 'ongoing',
 }
 
 export enum OrderType {
-    CARWASH = 'carWash',
-    CAR_SERVICING = 'carServicing',
-    EMERGENCY_RESCUE = 'emergencyRescue',
+    CARWASH = 'Car wash',
+    CAR_SERVICING = 'Car servicing',
+    EMERGENCY_RESCUE = 'Emergency rescue',
 }
 
 export enum AccountType {

@@ -5,13 +5,16 @@ import { generateOTP } from '../../utils/helpers';
 // import { generateAccessToken } from '../../utils/helpers';
 import { redisClient } from '../../utils/redis_client';
 import AfricasTalkingClient from '../../utils/africastalking-client';
+import { getIO } from '../../utils/socket_io';
 
 class ClientsController {
     private _africasTalkingClient = AfricasTalkingClient.getInstance();
 
     getAll: RequestHandler = async (_req, res, next) => {
         try {
-            const clients = await Client.find();
+            const clients = await Client.find({
+                where: { profileSetup: ProfileSetup.COMPLETE },
+            });
             res.status(200).json(clients);
         } catch (error) {
             if (error instanceof Error) {
@@ -40,7 +43,7 @@ class ClientsController {
         try {
             const client = await Client.findOne({ phoneNumber });
 
-            await redisClient.setEx(`client:${phoneNumber}:otp`, 360, otp);
+            await redisClient.setEx(`client:${phoneNumber}:otp`, 600, otp);
             await this._africasTalkingClient.sendSMS(
                 [phoneNumber],
                 `Your OTP from Biko Mechanic is : ${otp}`
@@ -107,23 +110,18 @@ class ClientsController {
         try {
             const client = await Client.findOne({ uuid });
             if (!client) return;
-            if (
-                client.phoneNumberVerification ===
-                PhoneNumberVerification.COMPLETE
-            ) {
-                (client.firstName = firstName),
-                    (client.lastName = lastName),
-                    (client.profileSetup = ProfileSetup.COMPLETE);
-                await client.save();
-                res.status(200).json({
-                    uuid: client.uuid,
-                    firstName: client.firstName,
-                    lastName: client.lastName,
-                    phoneNumber: client.phoneNumber,
-                });
-            } else {
-                res.status(405).json();
-            }
+            (client.firstName = firstName),
+                (client.lastName = lastName),
+                (client.profileSetup = ProfileSetup.COMPLETE);
+            await client.save();
+            const adminSocketId = await redisClient.get('adminSocketId');
+            getIO().to(adminSocketId).emit('newClient', client);
+            res.status(200).json({
+                uuid: client.uuid,
+                firstName: client.firstName,
+                lastName: client.lastName,
+                phoneNumber: client.phoneNumber,
+            });
         } catch (error) {
             if (error instanceof Error) {
                 next(new Error(error.message));

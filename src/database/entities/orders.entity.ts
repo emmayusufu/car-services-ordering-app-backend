@@ -23,6 +23,7 @@ export class Order extends Model {
         unique: false,
         nullable: false,
         enum: OrderStatus,
+        default: OrderStatus.PENDING,
     })
     status: string | null;
 }

@@ -15,11 +15,11 @@ class ClientsRouter implements AppRouter {
         this.router
             .get('/', this.controller.getAll)
             .get('/:uuid', this.controller.getOne)
-            .put(
+            .post(
                 '/phone-number-verification',
                 this.controller.phoneNumberVerification
             )
-            .put('/profile-setup/:uuid', this.controller.profileSetup)
+            .post('/profile-setup/:uuid', this.controller.profileSetup)
             .post(
                 '/continue-with-phone-number',
                 this.controller.continueWithPhoneNumber

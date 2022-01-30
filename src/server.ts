@@ -25,7 +25,6 @@ io.on('connection', socketIOController);
     let retries = 5;
     while (retries) {
         try {
-            console.log('trying to connect');
             await createConnection();
             server.listen(port, () => {
                 logger.info(`=================================`);

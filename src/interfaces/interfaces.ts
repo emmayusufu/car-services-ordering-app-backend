@@ -11,28 +11,35 @@ export interface IGetUserAuthInfoRequest extends Request {
 }
 
 export interface CarWashOrderRequest {
-    firstName: string;
-    lastName: string;
+    outCall: boolean;
+    inCall: boolean;
+}
+
+export interface CarServingOrderRequest {}
+
+export interface EmergencyRescueOrderRequest {}
+
+export interface OrderRequest {
     uuid: string;
-    phoneNumber: string;
     locationCoordinates: {
         latitude: string;
         longitude: string;
     };
+    details:
+        | CarWashOrderRequest
+        | CarServingOrderRequest
+        | EmergencyRescueOrderRequest;
 }
 
-export interface OrderRequest {
-    clientDetails: {
-        uuid: string;
+export interface ServerToClientEvents {
+    newClient: (data: {
+        createdAt: string;
         firstName: string;
         lastName: string;
         phoneNumber: string;
-    };
-    orderDetails: {
-        orderType: OrderType;
-        locationCoordinates: {
-            latitude: string;
-            longitude: string;
-        };
-    };
+        profileSetup: string;
+        updatedAt: string;
+        uuid: string;
+    }) => void;
+    privateMessage: (data: { body: string }) => void;
 }

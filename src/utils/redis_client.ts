@@ -10,10 +10,10 @@ redisClient.on('error', (err) => {
     logger.error('Redis Client Error', err);
 });
 
-async () => {
+(async () => {
     await redisClient.connect();
 
     await redisClient.flushAll();
-};
+})();
 
 export { redisClient };

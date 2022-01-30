@@ -13,6 +13,7 @@ class OrdersRouter implements AppRouter {
 
     initializeRoutes = () => {
         this.router
+            .get('/incoming-orders', this.controller.incomingOrders)
             .get('/', this.controller.getAll)
             .get('/:uuid', this.controller.getOne)
             .post('/order-car-wash', this.controller.orderCarWash)

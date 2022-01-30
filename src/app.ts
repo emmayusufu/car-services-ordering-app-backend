@@ -7,8 +7,14 @@ import EmergencyRescueRouter from './components/emergency_rescue/emergency_rescu
 import CarServicingRouter from './components/car_servicing/car_servicing.router';
 import CarWashRouter from './components/car_wash/car_wash.router';
 import OrdersRouter from './components/orders/orders.router';
+import cors from 'cors';
 
 const app = express();
+app.use(
+    cors({
+        origin: '*',
+    })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
