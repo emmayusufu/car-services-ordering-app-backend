@@ -9,6 +9,12 @@ import CarWashRouter from './components/car_wash/car_wash.router';
 import OrdersRouter from './components/orders/orders.router';
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.get('/', (_req, res) => {
+    res.json({ message: `Server is up and running` });
+});
 
 [
     new ClientsRouter(),
@@ -19,13 +25,6 @@ const app = express();
     new OrdersRouter(),
 ].map(({ path, router }) => {
     return app.use(path, router);
-});
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
-app.get('/', (_req, res) => {
-    res.json({ message: `Server is up and running` });
 });
 
 app.use((error: Error, req: Request, res: Response, _next: NextFunction) => {

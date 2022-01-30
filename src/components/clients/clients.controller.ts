@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import { Client } from '../../database/entities/clients.entity';
 import { PhoneNumberVerification, ProfileSetup } from '../../enums/enums';
 import { generateOTP } from '../../utils/helpers';
-import jwt from 'jsonwebtoken';
+// import { generateAccessToken } from '../../utils/helpers';
 import { redisClient } from '../../utils/redis_client';
 import AfricasTalkingClient from '../../utils/africastalking-client';
 
@@ -34,7 +34,7 @@ class ClientsController {
         }
     };
 
-    verifyPhoneNumber: RequestHandler = async (req, res, next) => {
+    continueWithPhoneNumber: RequestHandler = async (req, res, next) => {
         const { phoneNumber } = req.body as { phoneNumber: string };
         const otp = generateOTP();
         try {
@@ -46,18 +46,12 @@ class ClientsController {
                 `Your OTP from Biko Mechanic is : ${otp}`
             );
             if (client) {
-                res.status(200).json({
-                    message: 'client_already_exists',
-                    phoneNumber: client.phoneNumber,
-                });
+                res.status(200).json();
             } else {
                 const newClient = new Client();
                 newClient.phoneNumber = phoneNumber;
                 await newClient.save();
-                res.status(201).json({
-                    message: 'new_client_created',
-                    phoneNumber: newClient.phoneNumber,
-                });
+                res.status(201).json();
             }
         } catch (error) {
             if (error instanceof Error) {
@@ -66,7 +60,7 @@ class ClientsController {
         }
     };
 
-    verifyOtp: RequestHandler = async (req, res, next) => {
+    phoneNumberVerification: RequestHandler = async (req, res, next) => {
         const { otp, phoneNumber } = req.body as {
             otp: string;
             phoneNumber: string;
@@ -95,10 +89,10 @@ class ClientsController {
                         }
                     }
                 } else {
-                    res.json({ message: 'incorrect otp' });
+                    res.status(403).json({ message: 'incorrect otp' });
                 }
             } else {
-                res.json({ message: 'otp not found' });
+                res.status(404).json({ message: 'otp not found' });
             }
         } catch (error) {
             if (error instanceof Error) {

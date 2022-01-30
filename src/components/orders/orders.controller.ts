@@ -6,13 +6,16 @@ import { Partner } from '../../database/entities/partners.entity';
 import { Client } from '../../database/entities/clients.entity';
 import { CarWashOrderRequest } from '../../interfaces/interfaces';
 import { OrderType } from '../../enums/enums';
-import { NotificationService } from '../../utils/notification_service';
+// import { NotificationService } from '../../utils/notification_service';
 
 class OrdersController {
-    private _notificationService = NotificationService.getInstance();
+    // private _notificationService = NotificationService.getInstance();
 
     getAll: RequestHandler = async (req, res, next) => {
-        // const {} = req.body;
+        const partners = await Partner.find({
+            relations: ['partner', 'client'],
+        });
+        res.json(partners);
 
         try {
             res.json({ message: 'success' });
@@ -42,8 +45,8 @@ class OrdersController {
 
             await order.save();
 
-            const partnerDetails = await redisClient.get(`partner:12345`);
-            const { socketId } = JSON.parse(partnerDetails);
+            // const partnerDetails = await redisClient.get(`partner:12345`);
+            // const { socketId } = JSON.parse(partnerDetails);
 
             // const nearByPartners = await this._redisClient.commandsExecutor(
             //     {

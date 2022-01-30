@@ -1,9 +1,13 @@
-import { Router } from 'express';
+import { Request, Router } from 'express';
 import { OrderType } from '../enums/enums';
 
 export interface AppRouter {
     path: string;
     router: Router;
+}
+
+export interface IGetUserAuthInfoRequest extends Request {
+    user: string; // or any other type
 }
 
 export interface CarWashOrderRequest {

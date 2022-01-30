@@ -10,3 +10,4 @@ dump.rdb
 /dist
 /postgres_data
 /redis-data
+/redis-cache

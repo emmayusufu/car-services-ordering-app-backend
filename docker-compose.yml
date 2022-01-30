@@ -11,7 +11,7 @@ services:
       - "5000:5000"
     depends_on:
       - postgres_database
-      - cache    
+      - redis_cache    
     volumes:
       - ./:/app
       - /app/node_modules
@@ -20,16 +20,16 @@ services:
     command: npm run dev
 
   postgres_database:
-    image: postgres:latest
+    image: postgres:14.1
     restart: always
     container_name: postgres_database
+    ports:
+      - "4321:5432"
     env_file:
       - ./env/.env
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
-    ports:
-      - '4321:5432'
-  
+
   redis_cache:
     image: redislabs/redismod
     container_name: redis_cache

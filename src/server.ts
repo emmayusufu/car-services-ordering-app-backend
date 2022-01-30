@@ -21,25 +21,28 @@ const io = getIO();
 
 io.on('connection', socketIOController);
 
-async () => {
+(async () => {
     let retries = 5;
     while (retries) {
         try {
+            console.log('trying to connect');
             await createConnection();
+            server.listen(port, () => {
+                logger.info(`=================================`);
+                logger.info(`======= ENV: ${env} =======`);
+                logger.info(
+                    `App listening on the port http://localhost:${port}`
+                );
+                logger.info(`=================================`);
+            });
+
             break;
         } catch (error) {
             if (error instanceof Error) {
-                console.log(error);
+                logger.error(error);
             }
             retries -= 1;
             await new Promise((res) => setTimeout(res, 5000));
         }
     }
-};
-
-server.listen(port, () => {
-    logger.info(`=================================`);
-    logger.info(`======= ENV: ${env} =======`);
-    logger.info(`App listening on the port http://localhost:${port}`);
-    logger.info(`=================================`);
-});
+})();
