@@ -22,6 +22,13 @@ export class Order extends Model {
     @Column({
         unique: false,
         nullable: false,
+        enum: OrderType,
+    })
+    details: string | null;
+
+    @Column({
+        unique: false,
+        nullable: false,
         enum: OrderStatus,
         default: OrderStatus.PENDING,
     })

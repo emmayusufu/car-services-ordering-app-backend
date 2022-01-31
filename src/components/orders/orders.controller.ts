@@ -37,23 +37,27 @@ class OrdersController {
 
     orderCarWash: RequestHandler = async (req, res, next) => {
         const orderRequest = req.body as OrderRequest;
+        const { uuid, locationCoordinates, details } = orderRequest;
 
-        const { uuid, locationCoordinates } = orderRequest;
+        const carWashOrderDetails = details as CarWashOrderRequest;
 
         try {
             const client = await Client.findOne({ where: { uuid: uuid } });
-
             const order = new Order();
             order.client = client;
             order.type = OrderType.CARWASH;
+            order.details = JSON.stringify(carWashOrderDetails);
             await order.save();
             const adminSocketId = await redisClient.get('adminSocketId');
-            getIO().to(adminSocketId).emit('incomingOrder', {
-                type: OrderType.CARWASH,
-                uuid: order.uuid,
-                locationCoordinates,
-            });
-            res.status(201).json({ message: 'success' });
+            if (adminSocketId) {
+                getIO().to(adminSocketId).emit('incomingOrder', {
+                    type: OrderType.CARWASH,
+                    uuid: order.uuid,
+                    locationCoordinates,
+                    carWashOrderDetails,
+                });
+            }
+            res.status(200).json({ message: 'success' });
         } catch (error) {
             if (error instanceof Error) {
                 next(new Error(error.message));

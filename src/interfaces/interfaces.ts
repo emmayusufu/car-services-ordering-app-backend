@@ -7,17 +7,27 @@ export interface AppRouter {
 }
 
 export interface IGetUserAuthInfoRequest extends Request {
-    user: string; // or any other type
+    user: {
+        uuid: string;
+        accountType: string;
+    };
 }
 
 export interface CarWashOrderRequest {
-    outCall: boolean;
-    inCall: boolean;
+    packageName: string;
+    carType: string;
 }
 
-export interface CarServingOrderRequest {}
+export interface CarServingOrderRequest {
+    carMake: string;
+    carModel: string;
+    services: any[];
+}
 
-export interface EmergencyRescueOrderRequest {}
+export interface EmergencyRescueOrderRequest {
+    jumpStarting: boolean;
+    carTowing: boolean;
+}
 
 export interface OrderRequest {
     uuid: string;

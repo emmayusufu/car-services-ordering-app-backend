@@ -1,8 +1,7 @@
 import { RequestHandler } from 'express';
 import { Client } from '../../database/entities/clients.entity';
-import { PhoneNumberVerification, ProfileSetup } from '../../enums/enums';
+import { ProfileSetup } from '../../enums/enums';
 import { generateOTP } from '../../utils/helpers';
-// import { generateAccessToken } from '../../utils/helpers';
 import { redisClient } from '../../utils/redis_client';
 import AfricasTalkingClient from '../../utils/africastalking-client';
 import { getIO } from '../../utils/socket_io';
@@ -44,17 +43,22 @@ class ClientsController {
             const client = await Client.findOne({ phoneNumber });
 
             await redisClient.setEx(`client:${phoneNumber}:otp`, 600, otp);
-            await this._africasTalkingClient.sendSMS(
-                [phoneNumber],
-                `Your OTP from Biko Mechanic is : ${otp}`
-            );
+            console.log('mobile otp', parseInt(otp));
+            // await this._africasTalkingClient.sendSMS(
+            //     [phoneNumber],
+            //     `Your OTP from Biko Mechanic is : ${otp}`
+            // );
             if (client) {
-                res.status(200).json();
+                res.status(200).json({
+                    message: 'success',
+                });
             } else {
                 const newClient = new Client();
                 newClient.phoneNumber = phoneNumber;
                 await newClient.save();
-                res.status(201).json();
+                res.status(201).json({
+                    message: 'success',
+                });
             }
         } catch (error) {
             if (error instanceof Error) {
@@ -76,19 +80,25 @@ class ClientsController {
                         where: { phoneNumber: phoneNumber },
                     });
                     if (client) {
-                        if (ProfileSetup.PENDING) {
-                            res.status(200).json({
-                                message: 'profile_setup_pending',
-                                uuid: client.uuid,
-                            });
-                        } else if (ProfileSetup.COMPLETE) {
-                            res.status(200).json({
-                                message: 'profile_setup_complete',
-                                uuid: client.uuid,
-                                firstName: client.firstName,
-                                lastName: client.lastName,
-                                phoneNumber: client.phoneNumber,
-                            });
+                        switch (client.profileSetup) {
+                            case ProfileSetup.PENDING:
+                                res.status(200).json({
+                                    message: 'profile_setup_pending',
+                                    uuid: client.uuid,
+                                });
+                                break;
+                            case ProfileSetup.COMPLETE:
+                                res.status(200).json({
+                                    message: 'profile_setup_complete',
+                                    uuid: client.uuid,
+                                    firstName: client.firstName,
+                                    lastName: client.lastName,
+                                    phoneNumber: client.phoneNumber,
+                                });
+                                break;
+
+                            default:
+                                break;
                         }
                     }
                 } else {
