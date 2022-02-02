@@ -9,7 +9,6 @@ export interface AppRouter {
 export interface IGetUserAuthInfoRequest extends Request {
     user: {
         uuid: string;
-        accountType: string;
     };
 }
 

@@ -33,4 +33,8 @@ export class Order extends Model {
         default: OrderStatus.PENDING,
     })
     status: string | null;
+
+    toJSON() {
+        return { ...this, id: undefined, details: JSON.parse(this.details) };
+    }
 }

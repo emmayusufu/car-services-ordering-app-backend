@@ -3,9 +3,6 @@ import morgan from 'morgan';
 import { logger } from './utils/logger';
 import ClientsRouter from './components/clients/clients.router';
 import PartnersRouter from './components/partners/partners.router';
-import EmergencyRescueRouter from './components/emergency_rescue/emergency_rescue.router';
-import CarServicingRouter from './components/car_servicing/car_servicing.router';
-import CarWashRouter from './components/car_wash/car_wash.router';
 import OrdersRouter from './components/orders/orders.router';
 import cors from 'cors';
 
@@ -22,16 +19,11 @@ app.get('/', (_req, res) => {
     res.json({ message: `Server is up and running` });
 });
 
-[
-    new ClientsRouter(),
-    new PartnersRouter(),
-    new EmergencyRescueRouter(),
-    new CarServicingRouter(),
-    new CarWashRouter(),
-    new OrdersRouter(),
-].map(({ path, router }) => {
-    return app.use(path, router);
-});
+[new ClientsRouter(), new PartnersRouter(), new OrdersRouter()].map(
+    ({ path, router }) => {
+        return app.use(path, router);
+    }
+);
 
 app.use((error: Error, req: Request, res: Response, _next: NextFunction) => {
     const message = error.message || 'Something went wrong';

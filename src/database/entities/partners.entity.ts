@@ -1,10 +1,5 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
-import {
-    AccountType,
-    AccountStatus,
-    PhoneNumberVerification,
-    ProfileSetup,
-} from '../../enums/enums';
+import { AccountType, AccountStatus, ProfileSetup } from '../../enums/enums';
 import { Company } from './companies.entity';
 import { Individual } from './individuals.entity';
 import { Model } from './model';

@@ -1,30 +1,30 @@
 import {
-  BaseEntity,
-  PrimaryGeneratedColumn,
-  Column,
-  Generated,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from "typeorm";
+    BaseEntity,
+    PrimaryGeneratedColumn,
+    Column,
+    Generated,
+    CreateDateColumn,
+    UpdateDateColumn,
+} from 'typeorm';
 
 export abstract class Model extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id:  | undefined ;
+    @PrimaryGeneratedColumn()
+    id: string;
 
-  @Generated("uuid")
-  @Column({
-    unique: true,
-    nullable: false,
-  })
-  uuid: string | undefined ;
+    @Generated('uuid')
+    @Column({
+        unique: true,
+        nullable: false,
+    })
+    uuid: string;
 
-  @CreateDateColumn()
-  createdAt: Date | undefined ;
+    @CreateDateColumn()
+    createdAt: Date;
 
-  @UpdateDateColumn()
-  updatedAt: Date | undefined ;
+    @UpdateDateColumn()
+    updatedAt: Date;
 
-  toJSON() {
-    return { ...this, id: undefined };
-  }
+    toJSON() {
+        return { ...this, id: undefined };
+    }
 }

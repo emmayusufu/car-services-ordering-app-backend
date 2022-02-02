@@ -1,10 +1,11 @@
 import { RequestHandler } from 'express';
 import { Client } from '../../database/entities/clients.entity';
-import { ProfileSetup } from '../../enums/enums';
+import { AccountType, ProfileSetup } from '../../enums/enums';
 import { generateOTP } from '../../utils/helpers';
 import { redisClient } from '../../utils/redis_client';
 import AfricasTalkingClient from '../../utils/africastalking-client';
 import { getIO } from '../../utils/socket_io';
+import { generateAccessToken } from '../../utils/jwt_authentication';
 
 class ClientsController {
     private _africasTalkingClient = AfricasTalkingClient.getInstance();
@@ -82,21 +83,29 @@ class ClientsController {
                     if (client) {
                         switch (client.profileSetup) {
                             case ProfileSetup.PENDING:
+                                await redisClient.del(
+                                    `client:${phoneNumber}:otp`
+                                );
                                 res.status(200).json({
                                     message: 'profile_setup_pending',
                                     uuid: client.uuid,
                                 });
                                 break;
                             case ProfileSetup.COMPLETE:
+                                await redisClient.del(
+                                    `client:${phoneNumber}:otp`
+                                );
+                                const accessToken = generateAccessToken({
+                                    uuid: client.uuid,
+                                });
                                 res.status(200).json({
                                     message: 'profile_setup_complete',
-                                    uuid: client.uuid,
+                                    accessToken,
                                     firstName: client.firstName,
                                     lastName: client.lastName,
                                     phoneNumber: client.phoneNumber,
                                 });
                                 break;
-
                             default:
                                 break;
                         }
@@ -126,8 +135,11 @@ class ClientsController {
             await client.save();
             const adminSocketId = await redisClient.get('adminSocketId');
             getIO().to(adminSocketId).emit('newClient', client);
-            res.status(200).json({
+            const accessToken = generateAccessToken({
                 uuid: client.uuid,
+            });
+            res.status(200).json({
+                accessToken,
                 firstName: client.firstName,
                 lastName: client.lastName,
                 phoneNumber: client.phoneNumber,
@@ -139,11 +151,22 @@ class ClientsController {
         }
     };
 
+    reIssueAccessToken: RequestHandler = async (req, res, next) => {
+        const { refreshToken } = req.body;
+        try {
+            res.json({ message: 'success' });
+        } catch (error) {
+            if (error instanceof Error) {
+                next(new Error(error.message));
+            }
+        }
+    };
+
     resendOTP: RequestHandler = async (req, res, next) => {
         const { phoneNumber } = req.body;
         const otp = generateOTP();
         try {
-            // redisClient.setEx(phoneNumber, 30, otp);
+            await redisClient.setEx(`client:${phoneNumber}:otp`, 300, otp);
             res.json({ message: 'success' });
         } catch (error) {
             if (error instanceof Error) {

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AppRouter } from '../../interfaces/interfaces';
+import { authenticateAccessToken } from '../../utils/jwt_authentication';
 import OrdersController from './orders.controller';
 
 class OrdersRouter implements AppRouter {
@@ -13,15 +14,9 @@ class OrdersRouter implements AppRouter {
 
     initializeRoutes = () => {
         this.router
-            .get('/incoming-orders', this.controller.incomingOrders)
-            .get('/', this.controller.getAll)
-            .get('/:uuid', this.controller.getOne)
-            .post('/order-car-wash', this.controller.orderCarWash)
-            .post('/order-car-servicing', this.controller.orderCarServicing)
-            .post(
-                '/order-emergency-rescue',
-                this.controller.orderEmergencyRescue
-            );
+            .get('/', authenticateAccessToken, this.controller.getAll)
+            .get('/pending-orders', this.controller.pendingOrders)
+            .post('/order', authenticateAccessToken, this.controller.request);
     };
 }
 

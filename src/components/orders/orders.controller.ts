@@ -1,43 +1,38 @@
-import { RequestHandler, Response } from 'express';
+import { NextFunction, RequestHandler, Response } from 'express';
 import { getIO } from '../../utils/socket_io';
 import { redisClient } from '../../utils/redis_client';
 import { Order } from '../../database/entities/orders.entity';
-import { Partner } from '../../database/entities/partners.entity';
 import { Client } from '../../database/entities/clients.entity';
-import { CarWashOrderRequest, OrderRequest } from '../../interfaces/interfaces';
+import {
+    CarWashOrderRequest,
+    IGetUserAuthInfoRequest,
+    OrderRequest,
+} from '../../interfaces/interfaces';
 import { OrderType } from '../../enums/enums';
 import { logger } from '../../utils/logger';
-// import { NotificationService } from '../../utils/notification_service';
 
 class OrdersController {
-    // private _notificationService = NotificationService.getInstance();
     private _orderEventsResponse: Response;
 
     getAll: RequestHandler = async (req, res, next) => {
-        const partners = await Order.find({
+        const orders = await Order.find({
             relations: ['partner', 'client'],
         });
-        res.json(partners);
-
         try {
-            res.json({ message: 'success' });
+            res.json({ message: 'success', orders });
         } catch (error) {
             next(new Error(error));
         }
     };
 
-    getOne: RequestHandler = async (req, res, next) => {
-        const {} = req.body;
-
-        try {
-        } catch (error) {
-            next(new Error(error));
-        }
-    };
-
-    orderCarWash: RequestHandler = async (req, res, next) => {
+    request = async (
+        req: IGetUserAuthInfoRequest,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const { uuid } = req.user;
         const orderRequest = req.body as OrderRequest;
-        const { uuid, locationCoordinates, details } = orderRequest;
+        const { locationCoordinates, details } = orderRequest;
 
         const carWashOrderDetails = details as CarWashOrderRequest;
 
@@ -64,26 +59,7 @@ class OrdersController {
             }
         }
     };
-
-    orderCarServicing: RequestHandler = async (req, res, next) => {
-        const {} = req.body;
-
-        try {
-        } catch (error) {
-            next(new Error(error));
-        }
-    };
-
-    orderEmergencyRescue: RequestHandler = async (req, res, next) => {
-        const {} = req.body;
-
-        try {
-        } catch (error) {
-            next(new Error(error));
-        }
-    };
-
-    incomingOrders: RequestHandler = async (req, res) => {
+    pendingOrders: RequestHandler = async (req, res) => {
         const headers = {
             'Content-Type': 'text/event-stream',
             Connection: 'keep-alive',
