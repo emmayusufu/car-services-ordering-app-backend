@@ -1,4 +1,4 @@
-import { NextFunction, RequestHandler, Response } from 'express';
+import { NextFunction, RequestHandler, Response, Request } from 'express';
 import { getIO } from '../../utils/socket_io';
 import { redisClient } from '../../utils/redis_client';
 import { Order } from '../../database/entities/orders.entity';
@@ -8,12 +8,10 @@ import {
     IGetUserAuthInfoRequest,
     OrderRequest,
 } from '../../interfaces/interfaces';
-import { OrderType } from '../../enums/enums';
+import { OrderStatus, OrderType } from '../../enums/enums';
 import { logger } from '../../utils/logger';
 
 class OrdersController {
-    private _orderEventsResponse: Response;
-
     getAll: RequestHandler = async (req, res, next) => {
         const orders = await Order.find({
             relations: ['partner', 'client'],
@@ -25,32 +23,25 @@ class OrdersController {
         }
     };
 
-    request = async (
+    orderService = async (
         req: IGetUserAuthInfoRequest,
         res: Response,
         next: NextFunction
     ) => {
         const { uuid } = req.user;
         const orderRequest = req.body as OrderRequest;
-        const { locationCoordinates, details } = orderRequest;
-
-        const carWashOrderDetails = details as CarWashOrderRequest;
+        const { locationCoordinates, details, type } = orderRequest;
 
         try {
             const client = await Client.findOne({ where: { uuid: uuid } });
             const order = new Order();
             order.client = client;
-            order.type = OrderType.CARWASH;
-            order.details = JSON.stringify(carWashOrderDetails);
+            (order.type = type), (order.details = JSON.stringify(details));
+            order.location = JSON.stringify(locationCoordinates);
             await order.save();
             const adminSocketId = await redisClient.get('adminSocketId');
             if (adminSocketId) {
-                getIO().to(adminSocketId).emit('incomingOrder', {
-                    type: OrderType.CARWASH,
-                    uuid: order.uuid,
-                    locationCoordinates,
-                    carWashOrderDetails,
-                });
+                getIO().to(adminSocketId).emit('pendingOrder', order);
             }
             res.status(200).json({ message: 'success' });
         } catch (error) {
@@ -59,32 +50,26 @@ class OrdersController {
             }
         }
     };
-    pendingOrders: RequestHandler = async (req, res) => {
-        const headers = {
-            'Content-Type': 'text/event-stream',
-            Connection: 'keep-alive',
-            'Cache-Control': 'no-cache',
+
+    updateOrder = async (req: Request, res: Response, next: NextFunction) => {
+        const { uuid } = req.params as { uuid: string };
+        const { status, review, rating } = req.body as {
+            status: string;
+            review: string;
+            rating: number;
         };
-        res.writeHead(200, headers);
-
-        this._orderEventsResponse = res;
-
         try {
-            const orders = await Order.find({
-                relations: ['partner', 'client'],
-            });
-            const data = `data: ${JSON.stringify(orders)}\n\n`;
-
-            res.write(data);
+            const order = await Order.findOne({ where: { uuid } });
+            order.status = status ?? order.status;
+            order.rating = rating ?? order.rating;
+            order.review = review ?? order.review;
+            await order.save();
+            res.json({ message: 'success' });
         } catch (error) {
             if (error instanceof Error) {
-                logger.error(error.message);
+                next(new Error(error.message));
             }
         }
-
-        req.on('close', () => {
-            console.log(`Connection closed`);
-        });
     };
 }
 

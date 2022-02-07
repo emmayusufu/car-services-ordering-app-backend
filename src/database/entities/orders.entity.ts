@@ -7,7 +7,7 @@ import { Partner } from './partners.entity';
 @Entity({ name: 'orders' })
 export class Order extends Model {
     @ManyToOne(() => Client, (client) => client.orders)
-    client: Client | null;
+    client: Client;
 
     @ManyToOne(() => Partner, (partner) => partner.orders)
     partner: Partner | null;
@@ -17,14 +17,32 @@ export class Order extends Model {
         nullable: false,
         enum: OrderType,
     })
-    type: string | null;
+    type: string;
+
+    @Column({
+        unique: false,
+        nullable: true,
+    })
+    review: string;
+
+    @Column({
+        unique: false,
+        nullable: true,
+    })
+    rating: number;
+
+    @Column({
+        unique: false,
+        nullable: false,
+    })
+    location: string;
 
     @Column({
         unique: false,
         nullable: false,
         enum: OrderType,
     })
-    details: string | null;
+    details: string;
 
     @Column({
         unique: false,
@@ -32,7 +50,7 @@ export class Order extends Model {
         enum: OrderStatus,
         default: OrderStatus.PENDING,
     })
-    status: string | null;
+    status: string;
 
     toJSON() {
         return { ...this, id: undefined, details: JSON.parse(this.details) };

@@ -1,6 +1,4 @@
 import { Request, Router } from 'express';
-import { OrderType } from '../enums/enums';
-
 export interface AppRouter {
     path: string;
     router: Router;
@@ -29,7 +27,7 @@ export interface EmergencyRescueOrderRequest {
 }
 
 export interface OrderRequest {
-    uuid: string;
+    type: string;
     locationCoordinates: {
         latitude: string;
         longitude: string;

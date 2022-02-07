@@ -4,14 +4,14 @@ export enum PhoneNumberVerification {
 }
 
 export enum ProfileSetup {
-    PENDING = 'pending',
-    COMPLETE = 'complete',
+    PENDING = 'Pending',
+    COMPLETE = 'Complete',
 }
 
 export enum OrderStatus {
-    PENDING = 'pending',
-    COMPLETE = 'complete',
-    ONGOING = 'ongoing',
+    PENDING = 'Pending',
+    COMPLETE = 'Complete',
+    ONGOING = 'Ongoing',
 }
 
 export enum OrderType {

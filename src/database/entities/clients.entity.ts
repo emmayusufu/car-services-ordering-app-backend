@@ -39,4 +39,8 @@ export class Client extends Model {
 
     @OneToMany(() => Order, (order) => order.client)
     orders: Order[] | undefined;
+
+    toJSON(): this & { id: any } {
+        return { ...this, id: undefined, refreshToken: undefined };
+    }
 }
