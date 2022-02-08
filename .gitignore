@@ -6,8 +6,9 @@ tmp/
 temp/
 src/logs/
 dump.rdb
-/.env
 /dist
 /postgres_data
 /redis-data
 /redis-cache
+/coverage
+/env

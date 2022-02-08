@@ -2,7 +2,9 @@ node_modules
 Dockerfile
 .gitignore
 .git
-.dockerignore
-docker-compose*
-build
-README.MS
+*docker-compose*
+*.md
+.vscode
+coverage
+jest.config.js
+nodemon.json
