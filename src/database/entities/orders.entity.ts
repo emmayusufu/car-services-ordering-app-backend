@@ -10,14 +10,14 @@ export class Order extends Model {
     client: Client;
 
     @ManyToOne(() => Partner, (partner) => partner.orders)
-    partner: Partner | null;
+    partner: Partner;
 
     @Column({
         unique: false,
         nullable: false,
         enum: OrderType,
     })
-    type: string;
+    orderType: string;
 
     @Column({
         unique: false,
@@ -35,14 +35,14 @@ export class Order extends Model {
         unique: false,
         nullable: false,
     })
-    location: string;
+    clientLocation: string;
 
     @Column({
         unique: false,
         nullable: false,
         enum: OrderType,
     })
-    details: string;
+    orderDetails: string;
 
     @Column({
         unique: false,
@@ -53,6 +53,10 @@ export class Order extends Model {
     status: string;
 
     toJSON() {
-        return { ...this, id: undefined, details: JSON.parse(this.details) };
+        return {
+            ...this,
+            id: undefined,
+            details: JSON.parse(this.orderDetails),
+        };
     }
 }

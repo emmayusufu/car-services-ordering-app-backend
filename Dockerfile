@@ -10,11 +10,12 @@ WORKDIR /app
 COPY package*.json ./
 ARG NODE_ENV
 # RUN If [ "$NODE_ENV" = "development" ]; then npm install; else npm install --only=production; fi
-RUN if [ "$NODE_ENV" = "development" ]; then \
-    npm install; \
-    else \
-    npm install --only=production; \
-    fi
+# RUN if [ "$NODE_ENV" = "development" ]; then \
+#     npm install; \
+#     else \
+#     npm install --only=production; \
+#     fi
+RUN npm install
 
 # Bundle app source
 COPY . .

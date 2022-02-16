@@ -33,14 +33,8 @@ const socketIOController = async (socket: Socket) => {
             .then((response: string) => {
                 if (response === 'OK') {
                     console.log(`\n`);
-                    console.log(
-                        clc.cyanBright(
-                            `${new Date()
-                                .toLocaleString()
-                                .replace(',', '')} : A ${
-                                auth.accountType
-                            } has connected`
-                        )
+                    logger.info(
+                        clc.cyanBright(` A ${auth.accountType} has connected`)
                     );
                 }
             })
@@ -76,7 +70,7 @@ const socketIOController = async (socket: Socket) => {
     //    start listening for order responses from respective partners
     socket.on('orderResponse', (data) => {
         console.log(`\n`);
-        console.log(clc.yellow(`Order response data is ${data}`));
+        logger.info(clc.yellow(`Order response data is ${data}`));
     });
 
     //  remove user details from the redis database on disconnection i.e., personal details and location
@@ -88,13 +82,7 @@ const socketIOController = async (socket: Socket) => {
                     if (value) {
                         console.log(`\n`);
                         logger.info(
-                            clc.red(
-                                `${new Date()
-                                    .toLocaleString()
-                                    .replace(',', '')} : A ${
-                                    auth.accountType
-                                } has disconnected`
-                            )
+                            clc.red(` A ${auth.accountType} has disconnected`)
                         );
                     } else {
                         logger.error('Failed to remove disconnected user');

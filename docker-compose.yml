@@ -24,7 +24,7 @@ services:
     restart: always
     container_name: postgres_database
     ports:
-      - "4321:5432"
+      - "2020:5432"
     env_file:
       - ./env/.env
     volumes:
@@ -37,15 +37,6 @@ services:
       - '6378:6379'
     volumes: 
       - ./redis-cache:/data
-  # redis:
-  #   image: redis
-  #   restart: always
-  #   container_name: redis
-  #   ports:
-  #     - '6378:6379'
-  #   command: redis-server --save 20 1 --loglevel warning
-  #   volumes: 
-  #     - ./redis-data:/data
   # pgadmin:
   #   container_name: pgadmin
   #   image: dpage/pgadmin4

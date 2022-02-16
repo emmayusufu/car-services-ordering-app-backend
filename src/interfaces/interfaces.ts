@@ -7,6 +7,7 @@ export interface AppRouter {
 export interface IGetUserAuthInfoRequest extends Request {
     user: {
         uuid: string;
+        accountType: string;
     };
 }
 
@@ -27,10 +28,12 @@ export interface EmergencyRescueOrderRequest {
 }
 
 export interface OrderRequest {
-    type: string;
-    locationCoordinates: {
-        latitude: string;
-        longitude: string;
+    orderType: string;
+    userLocation: {
+        coordinates: {
+            latitude: string;
+            longitude: string;
+        };
     };
     details:
         | CarWashOrderRequest

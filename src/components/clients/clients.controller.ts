@@ -75,32 +75,30 @@ class ClientsController {
         };
         try {
             const value = await redisClient.get(`client:${phoneNumber}:otp`);
+
             if (value) {
                 if (otp === value) {
                     const client = await Client.findOne({
                         where: { phoneNumber: phoneNumber },
                     });
                     if (client) {
+                        await redisClient.del(`client:${phoneNumber}:otp`);
                         switch (client.profileSetup) {
                             case ProfileSetup.PENDING:
-                                await redisClient.del(
-                                    `client:${phoneNumber}:otp`
-                                );
                                 res.status(200).json({
                                     message: 'profile_setup_pending',
                                     uuid: client.uuid,
                                 });
                                 break;
                             case ProfileSetup.COMPLETE:
-                                await redisClient.del(
-                                    `client:${phoneNumber}:otp`
-                                );
                                 const accessToken = generateAccessToken({
                                     uuid: client.uuid,
+                                    accountType: 'client',
                                 });
-                                res.status(200).json({
+                                res.json({
                                     message: 'profile_setup_complete',
                                     accessToken,
+                                    uuid: client.uuid,
                                     firstName: client.firstName,
                                     lastName: client.lastName,
                                     phoneNumber: client.phoneNumber,
@@ -137,9 +135,12 @@ class ClientsController {
             getIO().to(adminSocketId).emit('newClient', client);
             const accessToken = generateAccessToken({
                 uuid: client.uuid,
+                accountType: 'client',
             });
             res.status(200).json({
+                message: 'success',
                 accessToken,
+                uuid: client.uuid,
                 firstName: client.firstName,
                 lastName: client.lastName,
                 phoneNumber: client.phoneNumber,

@@ -10,9 +10,10 @@ import {
 } from '../../interfaces/interfaces';
 import { OrderStatus, OrderType } from '../../enums/enums';
 import { logger } from '../../utils/logger';
+import { Partner } from 'src/database/entities/partners.entity';
 
 class OrdersController {
-    getAll: RequestHandler = async (req, res, next) => {
+    getAll: RequestHandler = async (_req, res, next) => {
         const orders = await Order.find({
             relations: ['partner', 'client'],
         });
@@ -23,21 +24,58 @@ class OrdersController {
         }
     };
 
-    orderService = async (
+    getUserOrders = async (
+        req: IGetUserAuthInfoRequest,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            const { uuid, accountType } = req.user;
+
+            switch (accountType) {
+                case 'client':
+                    const client = await Client.findOne({
+                        where: { uuid: uuid },
+                    });
+                    const clientOrders = await Order.find({
+                        where: { client: client },
+                    });
+                    res.json({ message: 'success', clientOrders });
+                    break;
+
+                case 'partner':
+                    //     const partner = await Partner.findOne({
+                    //         where: { uuid: uuid },
+                    //     });
+                    //     const partnerOrders = await Order.find({
+                    //         where: { partner: partner },
+                    //     });
+                    //     res.json({ message: 'success', partnerOrders });
+                    break;
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                next(new Error(error.message));
+            }
+        }
+    };
+
+    placeOrder = async (
         req: IGetUserAuthInfoRequest,
         res: Response,
         next: NextFunction
     ) => {
         const { uuid } = req.user;
         const orderRequest = req.body as OrderRequest;
-        const { locationCoordinates, details, type } = orderRequest;
+        const { userLocation, details, orderType } = orderRequest;
 
         try {
             const client = await Client.findOne({ where: { uuid: uuid } });
             const order = new Order();
             order.client = client;
-            (order.type = type), (order.details = JSON.stringify(details));
-            order.location = JSON.stringify(locationCoordinates);
+            (order.orderType = orderType),
+                (order.orderDetails = JSON.stringify(details));
+            order.clientLocation = JSON.stringify(userLocation);
             await order.save();
             const adminSocketId = await redisClient.get('adminSocketId');
             if (adminSocketId) {

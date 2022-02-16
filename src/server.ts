@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import http from 'http';
 import dotenv from 'dotenv';
 import { app } from './app';
-import { createConnection } from 'typeorm';
 import { logger } from './utils/logger';
 import { setIO, socketIOController, getIO } from './utils/socket_io';
 import path from 'path';
+import connection from './database/connection';
 
 dotenv.config({
     path: path.resolve(process.cwd(), 'env/.env'),
@@ -25,7 +25,7 @@ io.on('connection', socketIOController);
     let retries = 5;
     while (retries) {
         try {
-            await createConnection();
+            await connection.create();
             server.listen(port, () => {
                 logger.info(`=================================`);
                 logger.info(`======= ENV: ${env} =======`);

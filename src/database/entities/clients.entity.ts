@@ -24,12 +24,6 @@ export class Client extends Model {
     phoneNumber: string | null;
 
     @Column({
-        unique: true,
-        nullable: true,
-    })
-    refreshToken: string | null;
-
-    @Column({
         unique: false,
         nullable: true,
         enum: ProfileSetup,
@@ -37,7 +31,9 @@ export class Client extends Model {
     })
     profileSetup: string;
 
-    @OneToMany(() => Order, (order) => order.client)
+    @OneToMany(() => Order, (order) => order.client, {
+        cascade: true,
+    })
     orders: Order[] | undefined;
 
     toJSON(): this & { id: any } {

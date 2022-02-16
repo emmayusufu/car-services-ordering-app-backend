@@ -2,9 +2,10 @@ import { Response, NextFunction } from 'express';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
 import { IGetUserAuthInfoRequest } from '../interfaces/interfaces';
 
-const generateAccessToken = (data: { uuid: string }) => {
+const generateAccessToken = (data: { uuid: string; accountType: string }) => {
     const payLoad = {
         sub: data.uuid,
+        accountType: data.accountType,
         iat: Math.floor(Date.now() / 1000) - 30,
     };
     return jwt.sign(payLoad, process.env.ACCESS_TOKEN_SECRET as string);
@@ -40,6 +41,7 @@ const authenticateAccessToken = (
             }
             req.user = {
                 uuid: data.sub,
+                accountType: data.accountType,
             };
             next();
         }
