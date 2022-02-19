@@ -12,3 +12,4 @@ dump.rdb
 /redis-cache
 /coverage
 /env
+/nulified_code

@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
-import { AccountType, AccountStatus, ProfileSetup } from '../../enums/enums';
+import { PartnerType } from '../../enums/enums';
 import { Company } from './companies.entity';
 import { Individual } from './individuals.entity';
 import { Model } from './model';
@@ -13,45 +13,18 @@ export class Partner extends Model {
     })
     phoneNumber: string | null;
 
-    @Column({
-        nullable: false,
-        default: false,
+    @Column('text', {
+        nullable: true,
+        array: true,
     })
-    emergencyRescue: boolean;
-
-    @Column({
-        nullable: false,
-        default: false,
-    })
-    carWash: boolean;
-
-    @Column({
-        nullable: false,
-        default: false,
-    })
-    carServicing: boolean;
+    services: string[];
 
     @Column({
         unique: false,
         nullable: true,
-        enum: AccountType,
+        enum: PartnerType,
     })
-    accountType: string | null;
-
-    @Column({
-        unique: false,
-        nullable: true,
-        enum: ProfileSetup,
-        default: ProfileSetup.PENDING,
-    })
-    profileSetup: string | null;
-
-    @Column({
-        unique: false,
-        nullable: true,
-        enum: AccountStatus,
-    })
-    accountStatus: string | null;
+    partnerType: string | null;
 
     @OneToOne(() => Individual, (individual) => individual.partner)
     @JoinColumn()

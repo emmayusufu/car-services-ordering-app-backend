@@ -11,34 +11,40 @@ export interface IGetUserAuthInfoRequest extends Request {
     };
 }
 
-export interface CarWashOrderRequest {
+export interface CarWashOrderDetails {
     packageName: string;
     carType: string;
 }
 
-export interface CarServingOrderRequest {
+export interface CarServingOrderDetails {
     carMake: string;
     carModel: string;
     services: any[];
 }
 
-export interface EmergencyRescueOrderRequest {
+export interface EmergencyRescueOrderDetails {
     jumpStarting: boolean;
     carTowing: boolean;
 }
 
 export interface OrderRequest {
     orderType: string;
-    userLocation: {
-        coordinates: {
-            latitude: string;
-            longitude: string;
-        };
+    userLocation: UserLocation;
+    details: OrderDetails;
+}
+
+export interface OrderDetails {
+    carWash?: CarWashOrderDetails;
+    carServicing?: CarServingOrderDetails;
+    emergencyRescue?: EmergencyRescueOrderDetails;
+}
+
+export interface UserLocation {
+    geoAddress: string;
+    geoCoordinates: {
+        latitude: string;
+        longitude: string;
     };
-    details:
-        | CarWashOrderRequest
-        | CarServingOrderRequest
-        | EmergencyRescueOrderRequest;
 }
 
 export interface ServerToClientEvents {

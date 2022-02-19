@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Client } from '../../database/entities/clients.entity';
-import { AccountType, ProfileSetup } from '../../enums/enums';
+import { ProfileSetup } from '../../enums/enums';
 import { generateOTP } from '../../utils/helpers';
 import { redisClient } from '../../utils/redis_client';
 import AfricasTalkingClient from '../../utils/africastalking-client';

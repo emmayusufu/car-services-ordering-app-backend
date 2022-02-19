@@ -4,38 +4,25 @@ import { redisClient } from '../../utils/redis_client';
 import { Order } from '../../database/entities/orders.entity';
 import { Client } from '../../database/entities/clients.entity';
 import {
-    CarWashOrderRequest,
     IGetUserAuthInfoRequest,
     OrderRequest,
 } from '../../interfaces/interfaces';
-import { OrderStatus, OrderType } from '../../enums/enums';
+import { Partner } from '../../database/entities/partners.entity';
 import { logger } from '../../utils/logger';
-import { Partner } from 'src/database/entities/partners.entity';
+import clc from 'cli-color';
 
 class OrdersController {
-    getAll: RequestHandler = async (_req, res, next) => {
-        const orders = await Order.find({
-            relations: ['partner', 'client'],
-        });
-        try {
-            res.json({ message: 'success', orders });
-        } catch (error) {
-            next(new Error(error));
-        }
-    };
-
-    getUserOrders = async (
+    getOrders = async (
         req: IGetUserAuthInfoRequest,
         res: Response,
         next: NextFunction
     ) => {
         try {
-            const { uuid, accountType } = req.user;
-
-            switch (accountType) {
+            const user = req.user;
+            switch (user.accountType) {
                 case 'client':
                     const client = await Client.findOne({
-                        where: { uuid: uuid },
+                        where: { uuid: user.uuid },
                     });
                     const clientOrders = await Order.find({
                         where: { client: client },
@@ -44,13 +31,20 @@ class OrdersController {
                     break;
 
                 case 'partner':
-                    //     const partner = await Partner.findOne({
-                    //         where: { uuid: uuid },
-                    //     });
-                    //     const partnerOrders = await Order.find({
-                    //         where: { partner: partner },
-                    //     });
-                    //     res.json({ message: 'success', partnerOrders });
+                    const partner = await Partner.findOne({
+                        where: { uuid: user.uuid },
+                    });
+                    const partnerOrders = await Order.find({
+                        where: { partner: partner },
+                    });
+                    res.json({ message: 'success', partnerOrders });
+                    break;
+
+                case 'admin':
+                    const orders = await Order.find({
+                        relations: ['partner', 'client'],
+                    });
+                    res.json({ message: 'success', orders });
                     break;
             }
         } catch (error) {
@@ -65,17 +59,16 @@ class OrdersController {
         res: Response,
         next: NextFunction
     ) => {
-        const { uuid } = req.user;
+        const user = req.user;
         const orderRequest = req.body as OrderRequest;
         const { userLocation, details, orderType } = orderRequest;
 
         try {
-            const client = await Client.findOne({ where: { uuid: uuid } });
+            const client = await Client.findOne({ where: { uuid: user.uuid } });
             const order = new Order();
             order.client = client;
-            (order.orderType = orderType),
-                (order.orderDetails = JSON.stringify(details));
-            order.clientLocation = JSON.stringify(userLocation);
+            (order.orderType = orderType), (order.orderDetails = details);
+            order.clientLocation = userLocation;
             await order.save();
             const adminSocketId = await redisClient.get('adminSocketId');
             if (adminSocketId) {
@@ -89,19 +82,97 @@ class OrdersController {
         }
     };
 
-    updateOrder = async (req: Request, res: Response, next: NextFunction) => {
-        const { uuid } = req.params as { uuid: string };
-        const { status, review, rating } = req.body as {
-            status: string;
-            review: string;
+    rateOrder = async (
+        req: IGetUserAuthInfoRequest,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const user = req.user;
+        const params = req.params as { uuid: string };
+        const body = req.body as {
             rating: number;
+            review: string;
         };
         try {
-            const order = await Order.findOne({ where: { uuid } });
-            order.status = status ?? order.status;
-            order.rating = rating ?? order.rating;
-            order.review = review ?? order.review;
+            const order = await Order.findOne({
+                where: { uuid: params.uuid },
+            });
+            order.rating = body.rating ?? order.rating;
+            order.review = body.review ?? order.review;
             await order.save();
+            res.json({ message: 'success' });
+        } catch (error) {
+            if (error instanceof Error) {
+                next(new Error(error.message));
+            }
+        }
+    };
+
+    updateOrderProgress = async (
+        req: IGetUserAuthInfoRequest,
+        res: Response,
+        next: NextFunction
+    ) => {
+        const params = req.params as { uuid: string };
+        const body = req.body as { orderProgress: string };
+        try {
+            const order = await Order.findOne({
+                where: { uuid: params.uuid },
+            });
+            order.orderProgress = body.orderProgress;
+
+            await order.save();
+            res.json({
+                message: 'success',
+                orderUuid: order.uuid,
+                orderProgress: order.orderProgress,
+            });
+        } catch (error) {
+            if (error instanceof Error) {
+                next(new Error(error.message));
+            }
+        }
+    };
+
+    dispatchOrder: RequestHandler = async (req, res, next) => {
+        const body = req.body as {
+            orderUuid: string;
+            partnerUuid: string;
+        };
+        try {
+            const partner = await Partner.findOne({
+                where: { uuid: body.partnerUuid },
+            });
+
+            const order = await Order.findOne({
+                where: { uuid: body.orderUuid },
+                relations: ['client'],
+            });
+
+            order.partner = partner;
+
+            await order.save();
+
+            const partnerData = (await redisClient.json.get(
+                `partner:${body.partnerUuid}`,
+                {
+                    path: '.',
+                }
+            )) as {
+                socketId: string;
+            };
+
+            if (partnerData !== null) {
+                getIO()
+                    .to(partnerData.socketId)
+                    .emit('client_order_request', {
+                        ...order,
+                        partner: undefined,
+                    });
+            } else {
+                logger.error('Partner is offline');
+            }
+
             res.json({ message: 'success' });
         } catch (error) {
             if (error instanceof Error) {

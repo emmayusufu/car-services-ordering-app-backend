@@ -1,5 +1,6 @@
+import { OrderDetails, UserLocation } from '../../interfaces/interfaces';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { OrderStatus, OrderType } from '../../enums/enums';
+import { OrderType } from '../../enums/enums';
 import { Client } from './clients.entity';
 import { Model } from './model';
 import { Partner } from './partners.entity';
@@ -31,32 +32,21 @@ export class Order extends Model {
     })
     rating: number;
 
-    @Column({
+    @Column('json', {
         unique: false,
         nullable: false,
     })
-    clientLocation: string;
+    clientLocation: UserLocation;
+
+    @Column('jsonb', {
+        unique: false,
+        nullable: false,
+    })
+    orderDetails: OrderDetails;
 
     @Column({
         unique: false,
-        nullable: false,
-        enum: OrderType,
+        nullable: true,
     })
-    orderDetails: string;
-
-    @Column({
-        unique: false,
-        nullable: false,
-        enum: OrderStatus,
-        default: OrderStatus.PENDING,
-    })
-    status: string;
-
-    toJSON() {
-        return {
-            ...this,
-            id: undefined,
-            details: JSON.parse(this.orderDetails),
-        };
-    }
+    orderProgress: String;
 }

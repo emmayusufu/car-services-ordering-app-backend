@@ -8,7 +8,7 @@ export enum ProfileSetup {
     COMPLETE = 'Complete',
 }
 
-export enum OrderStatus {
+export enum OrderProgress {
     PENDING = 'Pending',
     COMPLETE = 'Complete',
     ONGOING = 'Ongoing',
@@ -20,7 +20,7 @@ export enum OrderType {
     EMERGENCY_RESCUE = 'Emergency rescue',
 }
 
-export enum AccountType {
+export enum PartnerType {
     COMPANY = 'company',
     INDIVIDUAL = 'individual',
 }

@@ -14,18 +14,23 @@ class OrdersRouter implements AppRouter {
 
     initializeRoutes = () => {
         this.router
-            .get('/', this.controller.getAll)
-            .get(
-                '/user',
-                authenticateAccessToken,
-                this.controller.getUserOrders
-            )
+            .get('/', authenticateAccessToken, this.controller.getOrders)
             .post(
                 '/place-order',
                 authenticateAccessToken,
                 this.controller.placeOrder
             )
-            .put('/update-order/:uuid', this.controller.updateOrder);
+            .put(
+                '/rate-order/uuid',
+                authenticateAccessToken,
+                this.controller.rateOrder
+            )
+            .post('/dispatch-order', this.controller.dispatchOrder)
+            .put(
+                '/update-order-progress/:uuid',
+                // authenticateAccessToken,
+                this.controller.updateOrderProgress
+            );
     };
 }
 

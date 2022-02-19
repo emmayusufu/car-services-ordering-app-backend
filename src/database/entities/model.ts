@@ -25,6 +25,11 @@ export abstract class Model extends BaseEntity {
     updatedAt: Date;
 
     toJSON() {
-        return { ...this, id: undefined };
+        return {
+            ...this,
+            id: undefined,
+            createdAt: undefined,
+            updatedAt: undefined,
+        };
     }
 }
