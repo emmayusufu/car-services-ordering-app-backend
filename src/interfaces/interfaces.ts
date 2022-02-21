@@ -59,3 +59,8 @@ export interface ServerToClientEvents {
     }) => void;
     privateMessage: (data: { body: string }) => void;
 }
+
+export interface SocketAuth {
+    uuid: string;
+    accountType: string;
+}

@@ -1,10 +1,16 @@
 import { createConnection, getConnection } from 'typeorm';
 
 const connection = {
+    /**
+     * Creates connection to the postgres database.
+     */
     async create() {
         await createConnection();
     },
 
+    /**
+     * kills the connection to the postgres database.
+     */
     async close() {
         await getConnection().close();
     },

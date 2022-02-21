@@ -3,7 +3,7 @@ import http from 'http';
 import { redisClient } from './redis_client';
 import clc from 'cli-color';
 import { logger } from './logger';
-import { ServerToClientEvents } from '../interfaces/interfaces';
+import { ServerToClientEvents, SocketAuth } from '../interfaces/interfaces';
 
 let IO: Server<ServerToClientEvents> | null = null;
 
@@ -18,87 +18,49 @@ const getIO = (): Server | null => {
 };
 
 const socketIOController = async (socket: Socket) => {
-    const auth = socket.handshake.auth as {
-        uuid: string;
-        accountType: string;
-    };
-    const socketId: string = socket.id;
+    const auth = socket.handshake.auth as SocketAuth;
 
-    //  store the user details in the redis database on connection
-    if (auth.accountType !== 'admin') {
-        redisClient.json
-            .set(`${auth.accountType}:${auth.uuid}`, '.', {
-                socketId,
-            })
-            .then((response: string) => {
-                if (response === 'OK') {
-                    console.log(`\n`);
-                    logger.info(
-                        clc.cyanBright(` A ${auth.accountType} has connected`)
-                    );
-                }
-            })
-            .catch((error) => {
-                console.log(clc.red(`Something went wrong : ${error}`));
+    /**
+     *  ? store the user details in the redis database on connection
+     */
+    switch (auth.accountType) {
+        case 'client':
+            logger.info(clc.cyanBright('A client has connected'));
+            await redisClient.json.set(`client:${auth.uuid}`, '.', {
+                socketId: socket.id,
             });
-    } else {
-        await redisClient.set('adminSocketId', socketId);
-        logger.info(clc.cyanBright('An admin has connected'));
+            await redisClient.sAdd('onlineClients', auth.uuid);
+            break;
+        case 'partner':
+            logger.info(clc.cyanBright('A partner has connected'));
+            await redisClient.json.set(`partner:${auth.uuid}`, '.', {
+                socketId: socket.id,
+            });
+            await redisClient.sAdd('onlinePartners', auth.uuid);
+            break;
+        case 'admin':
+            logger.info(clc.cyanBright('An admin has connected'));
+            break;
     }
 
-    //  start listening to user location updates and storing them in the redis database if user has account type of partner
-    if (auth.accountType === 'partner') {
-        socket.on('locationUpdates', (data: any) => {
-            const {
-                latitude,
-                longitude,
-                uuid,
-            }: { latitude: string; longitude: string; uuid: string } =
-                JSON.parse(data);
-            redisClient
-                .geoAdd('partnerLocations', {
-                    latitude: latitude,
-                    longitude: longitude,
-                    member: uuid,
-                })
-                .catch((error) => {
-                    console.log(clc.red(`location update error ${error}`));
-                });
-        });
-    }
+    /**
+     * ? remove user details from the redis database on disconnection
+     */
 
-    //    start listening for order responses from respective partners
-    socket.on('orderResponse', (data) => {
-        console.log(`\n`);
-        logger.info(clc.yellow(`Order response data is ${data}`));
-    });
-
-    //  remove user details from the redis database on disconnection i.e., personal details and location
     socket.on('disconnect', async () => {
-        if (auth.accountType !== 'admin') {
-            redisClient
-                .del(`${auth.accountType}:${auth.uuid}`)
-                .then((value: number) => {
-                    if (value) {
-                        console.log(`\n`);
-                        logger.info(
-                            clc.red(` A ${auth.accountType} has disconnected`)
-                        );
-                    } else {
-                        logger.error('Failed to remove disconnected user');
-                    }
-                });
-        }
-        //  if user role is partner, remove from geo index
-        if (auth.accountType === 'partner') {
-            redisClient.zRem(
-                'partnerLocations',
-                `${auth.accountType}:${auth.uuid}`
-            );
-        }
-        if (auth.accountType === 'admin') {
-            await redisClient.del('adminSocketId');
-            logger.info(clc.red(`An admin has disconnected`));
+        switch (auth.accountType) {
+            case 'client':
+                await redisClient.del(`client:${auth.uuid}`);
+                logger.info(clc.red(` A client has disconnected`));
+
+                break;
+            case 'partner':
+                await redisClient.del(`partner:${auth.uuid}`);
+                logger.info(clc.red(` A partner has disconnected`));
+                break;
+
+            default:
+                break;
         }
     });
 };

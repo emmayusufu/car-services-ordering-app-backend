@@ -1,4 +1,13 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { redisClient } from '../../utils/redis_client';
+import {
+    AfterInsert,
+    AfterLoad,
+    Column,
+    Entity,
+    JoinColumn,
+    OneToMany,
+    OneToOne,
+} from 'typeorm';
 import { PartnerType } from '../../enums/enums';
 import { Company } from './companies.entity';
 import { Individual } from './individuals.entity';

@@ -12,10 +12,24 @@ class PartnersController {
 
     getAll: RequestHandler = async (_req, res, next) => {
         try {
-            const partners = await Partner.find({
-                relations: ['individualDetails', 'companyDetails'],
+            const redisUsersData = await redisClient.json.get('users', {
+                path: '.partners',
             });
-            res.status(200).json(partners);
+
+            if (redisUsersData) {
+                const partners = JSON.parse(redisUsersData as string);
+
+                res.json(partners);
+            } else {
+                const partners = await Partner.find({
+                    relations: ['individualDetails', 'companyDetails'],
+                });
+                await redisClient.json.set('users', '.', {
+                    partners: JSON.stringify(partners),
+                });
+
+                res.status(200).json(partners);
+            }
         } catch (error) {
             if (error instanceof Error) {
                 next(new Error(error.message));

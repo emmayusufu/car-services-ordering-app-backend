@@ -5,14 +5,14 @@
     "username": "biko",
     "password": "240063013",
     "database": "biko_mechanic",
-    "synchronize": true,
+    "synchronize": false,
     "logging": true,
     "entities": ["src/database/entities/**/*.ts"],
-    "migrations": ["src/database/migration/**/*.ts"],
-    "subscribers": ["src/database/subscriber/**/*.ts"],
+    "migrations": ["src/database/migrations/**/*.ts"],
+    "subscribers": ["src/database/subscribers/**/*.ts"],
     "cli": {
         "entitiesDir": "src/database/entities",
         "migrationsDir": "src/database/migrations",
-        "subscribersDir": "src/database/subscriber"
+        "subscribersDir": "src/database/subscribers"
     }
 }

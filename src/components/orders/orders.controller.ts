@@ -114,18 +114,39 @@ class OrdersController {
         next: NextFunction
     ) => {
         const params = req.params as { uuid: string };
-        const body = req.body as { orderProgress: string };
+        const body = req.body as {
+            newOrderProgress: string;
+            currentOrderProgress: string;
+        };
         try {
             const order = await Order.findOne({
                 where: { uuid: params.uuid },
             });
-            order.orderProgress = body.orderProgress;
+            order.orderProgress = body.newOrderProgress;
 
             await order.save();
+
+            // if (body.newOrderProgress === 'Complete') {
+            //     const clientUuid = order.client.uuid;
+            //     const clientData = (await redisClient.json.get(
+            //         `client:${clientUuid}`,
+            //         {
+            //             path: '.',
+            //         }
+            //     )) as {
+            //         socketId: string;
+            //     };
+            //     getIO().to(clientData.socketId).emit('order_update', {
+            //         orderUuid: order.uuid,
+            //         orderProgress: 'Complete',
+            //     });
+            // }
+
             res.json({
                 message: 'success',
                 orderUuid: order.uuid,
-                orderProgress: order.orderProgress,
+                currentOrderProgress: order.orderProgress,
+                previousOrderProgress: body.currentOrderProgress,
             });
         } catch (error) {
             if (error instanceof Error) {
