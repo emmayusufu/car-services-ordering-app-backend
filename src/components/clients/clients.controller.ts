@@ -12,10 +12,24 @@ class ClientsController {
 
     getAll: RequestHandler = async (_req, res, next) => {
         try {
+            // const redisClientsData = await redisClient.json.get('users', {
+            //     path: '.clients',
+            // });
+
+            // if (redisClientsData) {
+            //     const clients = JSON.parse(redisClientsData as string);
+
+            //     res.json(clients);
+            // } else {
             const clients = await Client.find({
                 where: { profileSetup: ProfileSetup.COMPLETE },
             });
+            // await redisClient.json.set('users', '.', {
+            //     clients: JSON.stringify(clients),
+            // });
+
             res.status(200).json(clients);
+            // }
         } catch (error) {
             if (error instanceof Error) {
                 next(new Error(error.message));

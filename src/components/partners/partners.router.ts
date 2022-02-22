@@ -14,6 +14,10 @@ class PartnersRouter implements AppRouter {
     initializeRoutes() {
         this.router
             .get('/', this.controller.getAll)
+            .get(
+                '/stream-online-partners',
+                this.controller.streamOnlinePartners
+            )
             .post(
                 '/continue-with-phone-number',
                 this.controller.continueWithPhoneNumber

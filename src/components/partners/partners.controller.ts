@@ -37,6 +37,28 @@ class PartnersController {
         }
     };
 
+    streamOnlinePartners: RequestHandler = async (_req, res, _next) => {
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            Connection: 'keep-alive',
+            'Cache-Control': 'no-cache',
+        };
+        res.writeHead(200, headers);
+
+        setInterval(async () => {
+            const onlinePartnersUuids = await redisClient.sMembers(
+                'onlinePartnersUuids'
+            );
+            const data = `data: ${JSON.stringify(onlinePartnersUuids)}\n\n`;
+
+            res.write(`data: ${data}\n\n`);
+        }, 4000);
+
+        res.on('close', () => {
+            console.log(clc.red('Connection closed'));
+        });
+    };
+
     continueWithPhoneNumber: RequestHandler = async (req, res, next) => {
         const body = req.body as { phoneNumber: string };
         const otp = generateOTP();

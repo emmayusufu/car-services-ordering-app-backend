@@ -7,7 +7,7 @@ export class PartnersDatabaseSubscriber
     implements EntitySubscriberInterface<Partner>
 {
     async afterLoad(entity: Partner, event?: LoadEvent<Partner>): Promise<any> {
-        const cachedPartners = await redisClient.get('partners');
-        console.log('=========================', cachedPartners);
+        // const cachedPartners = await redisClient.get('partners');
+        // console.log('=========================', cachedPartners);
     }
 }

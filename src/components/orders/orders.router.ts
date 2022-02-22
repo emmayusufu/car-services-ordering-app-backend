@@ -14,7 +14,7 @@ class OrdersRouter implements AppRouter {
 
     initializeRoutes = () => {
         this.router
-            .get('/', authenticateAccessToken, this.controller.getOrders)
+            .get('/', this.controller.getOrders)
             .post(
                 '/place-order',
                 authenticateAccessToken,

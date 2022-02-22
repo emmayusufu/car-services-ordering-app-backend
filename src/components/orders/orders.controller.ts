@@ -18,35 +18,35 @@ class OrdersController {
         next: NextFunction
     ) => {
         try {
-            const user = req.user;
-            switch (user.accountType) {
-                case 'client':
-                    const client = await Client.findOne({
-                        where: { uuid: user.uuid },
-                    });
-                    const clientOrders = await Order.find({
-                        where: { client: client },
-                    });
-                    res.json({ message: 'success', clientOrders });
-                    break;
+            // const user = req.user;
+            // switch (user.accountType) {
+            //     case 'client':
+            //         const client = await Client.findOne({
+            //             where: { uuid: user.uuid },
+            //         });
+            //         const clientOrders = await Order.find({
+            //             where: { client: client },
+            //         });
+            //         res.json({ message: 'success', clientOrders });
+            //         break;
 
-                case 'partner':
-                    const partner = await Partner.findOne({
-                        where: { uuid: user.uuid },
-                    });
-                    const partnerOrders = await Order.find({
-                        where: { partner: partner },
-                    });
-                    res.json({ message: 'success', partnerOrders });
-                    break;
+            //     case 'partner':
+            //         const partner = await Partner.findOne({
+            //             where: { uuid: user.uuid },
+            //         });
+            //         const partnerOrders = await Order.find({
+            //             where: { partner: partner },
+            //         });
+            //         res.json({ message: 'success', partnerOrders });
+            //         break;
 
-                case 'admin':
-                    const orders = await Order.find({
-                        relations: ['partner', 'client'],
-                    });
-                    res.json({ message: 'success', orders });
-                    break;
-            }
+            //     case 'admin':
+            const orders = await Order.find({
+                relations: ['partner', 'client'],
+            });
+            res.json({ message: 'success', orders });
+            //         break;
+            // }
         } catch (error) {
             if (error instanceof Error) {
                 next(new Error(error.message));

@@ -25,21 +25,24 @@ const socketIOController = async (socket: Socket) => {
      */
     switch (auth.accountType) {
         case 'client':
+            await redisClient.hSet('onClientsSocketIds', auth.uuid, socket.id);
+            await redisClient.sAdd('onlineClientsUuids', auth.uuid);
             logger.info(clc.cyanBright('A client has connected'));
-            await redisClient.json.set(`client:${auth.uuid}`, '.', {
-                socketId: socket.id,
-            });
-            await redisClient.sAdd('onlineClients', auth.uuid);
             break;
         case 'partner':
+            await redisClient.hSet(
+                'onlinePartnersSocketIds',
+                auth.uuid,
+                socket.id
+            );
+            await redisClient.sAdd('onlinePartnersUuids', auth.uuid);
             logger.info(clc.cyanBright('A partner has connected'));
-            await redisClient.json.set(`partner:${auth.uuid}`, '.', {
-                socketId: socket.id,
-            });
-            await redisClient.sAdd('onlinePartners', auth.uuid);
             break;
         case 'admin':
-            logger.info(clc.cyanBright('An admin has connected'));
+            let obj = {};
+            obj['superAdmin'] = socket.id;
+            await redisClient.hSet('onlineAdminSocketIds', obj);
+            logger.info(clc.yellowBright('A super admin has connected'));
             break;
     }
 
@@ -50,13 +53,18 @@ const socketIOController = async (socket: Socket) => {
     socket.on('disconnect', async () => {
         switch (auth.accountType) {
             case 'client':
-                await redisClient.del(`client:${auth.uuid}`);
+                await redisClient.hDel('onClientsSocketIds', auth.uuid);
+                await redisClient.sRem('onlineClientsUuids', auth.uuid);
                 logger.info(clc.red(` A client has disconnected`));
 
                 break;
             case 'partner':
-                await redisClient.del(`partner:${auth.uuid}`);
+                await redisClient.sRem('onlinePartnersUuids', auth.uuid);
                 logger.info(clc.red(` A partner has disconnected`));
+                break;
+            case 'admin':
+                await redisClient.hDel('onlineAdminSocketIds', 'superAdmin');
+                logger.info(clc.red(`A super admin has disconnected`));
                 break;
 
             default:
