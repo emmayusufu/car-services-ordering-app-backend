@@ -22,11 +22,6 @@ export interface CarServingOrderDetails {
     services: any[];
 }
 
-export interface EmergencyRescueOrderDetails {
-    jumpStarting: boolean;
-    carTowing: boolean;
-}
-
 export interface OrderRequest {
     orderType: string;
     userLocation: UserLocation;
@@ -36,7 +31,7 @@ export interface OrderRequest {
 export interface OrderDetails {
     carWash?: CarWashOrderDetails;
     carServicing?: CarServingOrderDetails;
-    emergencyRescue?: EmergencyRescueOrderDetails;
+    emergencyRescue?: string[];
 }
 
 export interface UserLocation {

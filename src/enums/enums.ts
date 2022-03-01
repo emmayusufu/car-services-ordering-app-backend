@@ -9,6 +9,7 @@ export enum ProfileSetup {
 }
 
 export enum OrderProgress {
+    WAITING_FOR_DISPATCH = 'Waiting for dispatch',
     PENDING = 'Pending',
     COMPLETE = 'Complete',
     ONGOING = 'Ongoing',

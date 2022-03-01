@@ -1,16 +1,20 @@
 import { OrderDetails, UserLocation } from '../../interfaces/interfaces';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { OrderType } from '../../enums/enums';
+import { OrderProgress, OrderType } from '../../enums/enums';
 import { Client } from './clients.entity';
 import { Model } from './model';
 import { Partner } from './partners.entity';
 
 @Entity({ name: 'orders' })
 export class Order extends Model {
-    @ManyToOne(() => Client, (client) => client.orders)
+    @ManyToOne(() => Client, (client) => client.orders, {
+        onDelete: 'CASCADE',
+    })
     client: Client;
 
-    @ManyToOne(() => Partner, (partner) => partner.orders)
+    @ManyToOne(() => Partner, (partner) => partner.orders, {
+        onDelete: 'CASCADE',
+    })
     partner: Partner;
 
     @Column({
@@ -28,7 +32,8 @@ export class Order extends Model {
 
     @Column({
         unique: false,
-        nullable: true,
+        nullable: false,
+        default: 0,
     })
     rating: number;
 
@@ -46,7 +51,9 @@ export class Order extends Model {
 
     @Column({
         unique: false,
-        nullable: true,
+        nullable: false,
+        enum: OrderProgress,
+        default: OrderProgress.WAITING_FOR_DISPATCH,
     })
     orderProgress: String;
 }

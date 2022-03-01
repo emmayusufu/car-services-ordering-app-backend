@@ -35,14 +35,20 @@ export class Partner extends Model {
     })
     partnerType: string | null;
 
-    @OneToOne(() => Individual, (individual) => individual.partner)
+    @OneToOne(() => Individual, (individual) => individual.partner, {
+        cascade: true,
+    })
     @JoinColumn()
     individualDetails: Individual | null;
 
-    @OneToOne(() => Company, (company) => company.partner)
+    @OneToOne(() => Company, (company) => company.partner, {
+        cascade: true,
+    })
     @JoinColumn()
     companyDetails: Company | null;
 
-    @OneToMany(() => Order, (order) => order.partner)
+    @OneToMany(() => Order, (order) => order.partner, {
+        cascade: true,
+    })
     orders: Order[] | null;
 }

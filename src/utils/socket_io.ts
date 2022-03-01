@@ -41,10 +41,18 @@ const socketIOController = async (socket: Socket) => {
         case 'admin':
             let obj = {};
             obj['superAdmin'] = socket.id;
-            await redisClient.hSet('onlineAdminSocketIds', obj);
+            await redisClient.hSet('onlineAdminsSocketIds', obj);
             logger.info(clc.yellowBright('A super admin has connected'));
             break;
     }
+
+    /**
+     * ? store partner locations
+     */
+    socket.on('partnerLocation', async (data: any) => {
+        // await redisClient.hSet("partnerLocations",data)
+        console.log(clc.bgMagenta(`location data ${data}`));
+    });
 
     /**
      * ? remove user details from the redis database on disconnection

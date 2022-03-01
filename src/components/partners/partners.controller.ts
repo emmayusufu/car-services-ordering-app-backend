@@ -6,6 +6,8 @@ import AfricasTalkingClient from '../../utils/africastalking-client';
 import { generateAccessToken } from '../../utils/jwt_authentication';
 import clc from 'cli-color';
 import { logger } from '../../utils/logger';
+import { Individual } from '../../database/entities/individuals.entity';
+import { Company } from '../../database/entities/companies.entity';
 
 class PartnersController {
     private _africasTalkingClient = AfricasTalkingClient.getInstance();
@@ -45,7 +47,7 @@ class PartnersController {
         };
         res.writeHead(200, headers);
 
-        setInterval(async () => {
+        const interval = setInterval(async () => {
             const onlinePartnersUuids = await redisClient.sMembers(
                 'onlinePartnersUuids'
             );
@@ -55,7 +57,24 @@ class PartnersController {
         }, 4000);
 
         res.on('close', () => {
-            console.log(clc.red('Connection closed'));
+            clearInterval(interval);
+        });
+    };
+
+    streamPartnersLocation: RequestHandler = async (req, res, _next) => {
+        const params = req.params as { uuid: string };
+        const uuid = params.uuid;
+
+        const interval = setInterval(async () => {
+            const data = await redisClient.hGet('partnerLocations', uuid);
+
+            const locationCoordinates = `data: ${JSON.stringify(data)}\n\n`;
+
+            res.write(`data: ${locationCoordinates}\n\n`);
+        }, 4000);
+
+        req.on('close', () => {
+            clearInterval(interval);
         });
     };
 
@@ -136,17 +155,51 @@ class PartnersController {
 
     createPartner: RequestHandler = async (req, res, next) => {
         const body = req.body as {
-            phoneNumber: string;
-            services: string[];
-            partnerType: string;
+            generalDetails: {
+                phoneNumber: string;
+                partnerType: string;
+                services: string[];
+            };
+            companyDetails?: {
+                companyName: string;
+            };
+            individualDetails?: {
+                firstName: string;
+                lastName: string;
+            };
         };
         try {
-            const partner = new Partner();
-            partner.phoneNumber = body.phoneNumber;
-            partner.services = body.services;
-            partner.partnerType = body.partnerType;
-            await partner.save();
-            res.status(201).json({ message: 'success' });
+            if (body.generalDetails.partnerType === 'Individual') {
+                const partner = new Partner();
+                const individual = new Individual();
+                individual.firstName = body.individualDetails.firstName;
+                individual.lastName = body.individualDetails.lastName;
+
+                await individual.save();
+
+                await individual.reload();
+
+                partner.partnerType = body.generalDetails.partnerType;
+                partner.services = body.generalDetails.services;
+                partner.phoneNumber = body.generalDetails.phoneNumber;
+                partner.individualDetails = individual;
+                await partner.save();
+                res.status(201).json({ message: 'success' });
+            } else if (body.generalDetails.partnerType === 'Company') {
+                const partner = new Partner();
+                const company = new Company();
+                company.companyName = body.companyDetails.companyName;
+                await company.save();
+
+                await company.reload();
+
+                partner.partnerType = body.generalDetails.partnerType;
+                partner.services = body.generalDetails.services;
+                partner.phoneNumber = body.generalDetails.phoneNumber;
+                partner.companyDetails = company;
+                await partner.save();
+                res.status(201).json({ message: 'success' });
+            }
         } catch (error) {
             if (error instanceof Error) {
                 next(new Error(error.message));

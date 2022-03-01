@@ -70,11 +70,14 @@ class OrdersController {
             (order.orderType = orderType), (order.orderDetails = details);
             order.clientLocation = userLocation;
             await order.save();
-            const adminSocketId = await redisClient.get('adminSocketId');
-            if (adminSocketId) {
-                getIO().to(adminSocketId).emit('pendingOrder', order);
+            const socketId = await redisClient.hGet(
+                'onlineAdminsSocketIds',
+                'superAdmin'
+            );
+            if (socketId) {
+                getIO().to(socketId).emit('newOrder', order);
             }
-            res.status(200).json({ message: 'success' });
+            res.status(201).json({ message: 'success' });
         } catch (error) {
             if (error instanceof Error) {
                 next(new Error(error.message));
@@ -174,18 +177,14 @@ class OrdersController {
 
             await order.save();
 
-            const partnerData = (await redisClient.json.get(
-                `partner:${body.partnerUuid}`,
-                {
-                    path: '.',
-                }
-            )) as {
-                socketId: string;
-            };
+            const socketId = await redisClient.hGet(
+                'onlinePartnersSocketIds',
+                body.partnerUuid
+            );
 
-            if (partnerData !== null) {
+            if (socketId !== null) {
                 getIO()
-                    .to(partnerData.socketId)
+                    .to(socketId)
                     .emit('client_order_request', {
                         ...order,
                         partner: undefined,
